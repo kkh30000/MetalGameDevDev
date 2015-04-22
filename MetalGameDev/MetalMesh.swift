@@ -13,19 +13,15 @@ import Metal
 class MeshAssets:NSObject {
     var m_vertexArray:[Float]?
     var m_vertexIndices:[UInt16]?
-    var m_normalArray:[Float]?
     var m_textureCoord:[Float]?
     
     
     
-    init(vertexArray:[Float],indices:[UInt16]?,normal:[Float]?,texutureCoord:[Float]?) {
+    init(vertexArray:[Float],indices:[UInt16]?,texutureCoord:[Float]?) {
         super.init()
         m_vertexArray = vertexArray
         if indices != nil{
             m_vertexIndices = indices
-        }
-        if normal != nil{
-            m_normalArray = normal
         }
         if texutureCoord != nil{
             m_textureCoord = texutureCoord
@@ -44,13 +40,6 @@ class MeshAssets:NSObject {
         return arrayLength(m_vertexIndices!)
     }
     
-    func normalLength()->Int{
-        if m_normalArray != nil{
-            return arrayLength(m_normalArray!)
-        }else{
-            return -1
-        }
-    }
     func textureCoordLength()->Int{
         if m_textureCoord != nil{
             return arrayLength(m_textureCoord!)
@@ -73,7 +62,7 @@ class MTLMesh:NSObject {
     var m_vertexBuffer:MTLBuffer! = nil
     var m_indexBuffer:MTLBuffer?
     var m_textureCoordBuffer:MTLBuffer?
-    var m_normalBuffer:MTLBuffer?
+    
     var m_renderPipeLineState:MTLRenderPipelineState?
     var m_scene:MTLGameScene?
     var m_vertexShader:String?
@@ -93,9 +82,6 @@ class MTLMesh:NSObject {
         m_vertexBuffer = device.newBufferWithBytes(meshAsset.m_vertexArray!, length: meshAsset.vertexArrayLength(), options: nil)
         if m_meshAssets.m_vertexIndices != nil{
             m_indexBuffer = device.newBufferWithBytes(meshAsset.m_vertexIndices!, length: meshAsset.vertexIndicesLength(), options: nil)
-        }
-        if meshAsset.m_normalArray != nil{
-            m_normalBuffer = device.newBufferWithBytes(meshAsset.m_normalArray!, length: meshAsset.normalLength(), options: nil)
         }
         if meshAsset.m_textureCoord != nil{
             m_textureCoordBuffer = device.newBufferWithBytes(meshAsset.m_textureCoord!, length: meshAsset.textureCoordLength(), options: nil)

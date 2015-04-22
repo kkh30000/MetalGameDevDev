@@ -67,23 +67,25 @@ class MTLGameScene:UIView,MTLGameViewControllerDelegate{
         m_metalLayer!.drawsAsynchronously = true
         m_metalLayer!.presentsWithTransaction = false
         
-        var mesh = MTLMesh(meshAsset: MeshAssets(vertexArray:please_work2, indices: humandroid_indices, normal: nil, texutureCoord: nil), scene: self,vertexShader:"vertexShader",fragmentShader:"fragmentShader1",drawType:MTLPrimitiveType.Triangle,depthType:MTLPixelFormat.Depth32Float)
-        var mesh3 = MTLMesh(meshAsset: MeshAssets(vertexArray:please_work2, indices: humandroid_indices, normal: nil, texutureCoord: nil), scene: self,vertexShader:"vertexShader",fragmentShader:"fragmentShader2",drawType:MTLPrimitiveType.Triangle,depthType:MTLPixelFormat.Depth32Float)
-        var mesh1 = MTLMesh(meshAsset: MeshAssets(vertexArray:  plat_vertex, indices: plat_indices, normal: nil, texutureCoord: nil), scene: self,vertexShader:"vertexShader_Static",fragmentShader:"fragmentShader2",drawType:MTLPrimitiveType.Triangle,depthType:MTLPixelFormat.Depth32Float)
-        var mesh2 = MTLMesh(meshAsset: MeshAssets(vertexArray:axis_vertex, indices: axis_indices, normal: nil, texutureCoord: nil), scene: self,vertexShader:"vertexShader_Static",fragmentShader:"fragmentShader1",drawType:MTLPrimitiveType.Line,depthType:MTLPixelFormat.Depth32Float)
+        var mesh = MTLMesh(meshAsset: MeshAssets(vertexArray:please_work2, indices: humandroid_indices, texutureCoord: nil), scene: self,vertexShader:"vertexShader",fragmentShader:"phong_fragment",drawType:MTLPrimitiveType.Triangle,depthType:MTLPixelFormat.Depth32Float)
+        var mesh3 = MTLMesh(meshAsset: MeshAssets(vertexArray:please_work2, indices: humandroid_indices, texutureCoord: nil), scene: self,vertexShader:"vertexShader",fragmentShader:"fragmentShader2",drawType:MTLPrimitiveType.Triangle,depthType:MTLPixelFormat.Depth32Float)
+        var mesh1 = MTLMesh(meshAsset: MeshAssets(vertexArray:  plat_vertex, indices: plat_indices,texutureCoord: nil), scene: self,vertexShader:"vertexShader_Static",fragmentShader:"fragmentShader2",drawType:MTLPrimitiveType.Triangle,depthType:MTLPixelFormat.Depth32Float)
+        var mesh2 = MTLMesh(meshAsset: MeshAssets(vertexArray:axis_vertex, indices: axis_indices,texutureCoord: nil), scene: self,vertexShader:"vertexShader_Static",fragmentShader:"fragmentShader1",drawType:MTLPrimitiveType.Line,depthType:MTLPixelFormat.Depth32Float)
         var actor1 = MTLActor(mesh: mesh, animationController: MTLAnimationController(animationFileName: "animation", scene: self))
         //var actor4 = MTLActor(mesh: mesh3, animationController: MTLAnimationController(animationFileName: "animation1", scene: self))
         var actor2 = MTLActor(mesh: mesh1, animationController: nil)
         var actor3 = MTLActor(mesh: mesh2, animationController: nil)
+        //var actor1 = MTLActor(mesh: mesh1, animationController: nil)
         
         m_player = MTLGamePlayer(scene: self)
-        m_player!.prepareActors([actor1,actor2,actor3])
+        m_player!.prepareActors([actor1,actor3,actor2])
         m_mvpMatrix = [Float](count: 48, repeatedValue: 0.0)
         m_modelMatrix = Matrix()
+        //m_modelMatrix.translate(0, y: -300, z: 0)
         m_mvpMatrix[0...15] = m_modelMatrix.raw()[0...15]
         m_camera = MTLCamera(pos: [800,800,800], target: [0,0,0], up: [0,1,0])
         m_mvpMatrix[16...31] = m_camera.viewMatrix().raw()[0...15]
-        m_mvpMatrix[32...47] = Matrix.MatrixMakeFrustum_oc(3, right: -3, bottom: 3 , top: -3 , near: -3.01, far:3.01).raw()[0...15]
+        m_mvpMatrix[32...47] = Matrix.MatrixMakeFrustum_oc(-3.01, right: 3.01, bottom: -3.01 , top: +3.01 , near: 3.01, far:-3.01).raw()[0...15]
         
         //m_animUniform = MTLUniform(size: sizeofValue(m_animArray[0]) * m_animArray.count , device: m_device!)
         m_uniform = MTLUniform(size: sizeofValue(m_mvpMatrix[0]) * m_mvpMatrix.count, device: m_device!)
