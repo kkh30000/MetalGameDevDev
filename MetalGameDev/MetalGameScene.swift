@@ -69,16 +69,16 @@ class MTLGameScene:UIView,MTLGameViewControllerDelegate{
         
         var mesh = MTLMesh(meshAsset: MeshAssets(vertexArray:please_work2, indices: humandroid_indices, texutureCoord: nil), scene: self,vertexShader:"vertexShader",fragmentShader:"phong_fragment",drawType:MTLPrimitiveType.Triangle,depthType:MTLPixelFormat.Depth32Float)
         var mesh3 = MTLMesh(meshAsset: MeshAssets(vertexArray:please_work2, indices: humandroid_indices, texutureCoord: nil), scene: self,vertexShader:"vertexShader",fragmentShader:"fragmentShader2",drawType:MTLPrimitiveType.Triangle,depthType:MTLPixelFormat.Depth32Float)
-        var mesh1 = MTLMesh(meshAsset: MeshAssets(vertexArray:  plat_vertex, indices: plat_indices,texutureCoord: nil), scene: self,vertexShader:"vertexShader_Static",fragmentShader:"fragmentShader2",drawType:MTLPrimitiveType.Triangle,depthType:MTLPixelFormat.Depth32Float)
-        var mesh2 = MTLMesh(meshAsset: MeshAssets(vertexArray:axis_vertex, indices: axis_indices,texutureCoord: nil), scene: self,vertexShader:"vertexShader_Static",fragmentShader:"fragmentShader1",drawType:MTLPrimitiveType.Line,depthType:MTLPixelFormat.Depth32Float)
+        var mesh1 = MTLMesh(meshAsset: MeshAssets(vertexArray:  plat_vertex, indices: plat_indices,texutureCoord: nil), scene: self,vertexShader:"vertexShader_Static",fragmentShader:"phong_fragment_static",drawType:MTLPrimitiveType.Triangle,depthType:MTLPixelFormat.Depth32Float)
+        //var mesh2 = MTLMesh(meshAsset: MeshAssets(vertexArray:axis_vertex, indices: axis_indices,texutureCoord: nil), scene: self,vertexShader:"vertexShader_Static",fragmentShader:"fragmentShader1",drawType:MTLPrimitiveType.Line,depthType:MTLPixelFormat.Depth32Float)
         var actor1 = MTLActor(mesh: mesh, animationController: MTLAnimationController(animationFileName: "animation", scene: self))
         //var actor4 = MTLActor(mesh: mesh3, animationController: MTLAnimationController(animationFileName: "animation1", scene: self))
         var actor2 = MTLActor(mesh: mesh1, animationController: nil)
-        var actor3 = MTLActor(mesh: mesh2, animationController: nil)
+        //var actor3 = MTLActor(mesh: mesh2, animationController: nil)
         //var actor1 = MTLActor(mesh: mesh1, animationController: nil)
         
         m_player = MTLGamePlayer(scene: self)
-        m_player!.prepareActors([actor1,actor3,actor2])
+        m_player!.prepareActors([actor1,actor2])
         m_mvpMatrix = [Float](count: 48, repeatedValue: 0.0)
         m_modelMatrix = Matrix()
         //m_modelMatrix.translate(0, y: -300, z: 0)
@@ -262,8 +262,6 @@ class MTLGameScene:UIView,MTLGameViewControllerDelegate{
     
     
     
-    
-    
     func renderPassDescriptor()->MTLRenderPassDescriptor{
         let drawable = self.currentDrawable()
         setRenderPassDescriptorWithTexture(drawable.texture)
@@ -280,9 +278,9 @@ class MTLGameScene:UIView,MTLGameViewControllerDelegate{
     }
     
     func updatePerFrame(viewcontroller: MTLGameViewController) {
-        m_modelMatrix.rotate(0.5, r: [0,1,0])
-        m_mvpMatrix[0...15] = m_modelMatrix.raw()[0...15]
-        m_uniform.updateDataToUniform(m_mvpMatrix, toUniform: m_uniform[m_player!.m_currentUniform!])
+        //m_modelMatrix.rotate(0.5, r: [0,1,0])
+        //m_mvpMatrix[0...15] = m_modelMatrix.raw()[0...15]
+        //m_uniform.updateDataToUniform(m_mvpMatrix, toUniform: m_uniform[m_player!.m_currentUniform!])
         m_player.m_actors![0].m_animationController!.play(viewcontroller.m_gameTime, currentBuffer: m_player.m_currentUniform!)
         //m_player.m_actors![1].m_animationController!.play(viewcontroller.m_gameTime * 0.8, currentBuffer: m_player.m_currentUniform!)
         

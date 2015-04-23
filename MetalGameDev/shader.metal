@@ -23,10 +23,15 @@ struct InVertex{
     float bone1;
     float weight1;
 };
+struct InVertexStatic{
+    packed_float3 position;
+    packed_float3 normal;
+
+};
 //常量
 
-constant float3 Light_Position = float3(-1,1,-1);
-constant float4 materialAmbientColor = float4(0.18, 0.18, 0.18, 1.0);
+constant float3 Light_Position = float3(0,1000,0);
+constant float4 materialAmbientColor = float4(0.15, 0.15, 0.65, 1.0);
 constant float4 materialDiffuseColor = float4(0.4, 0.4, 0.4, 1.0);
 constant float4 light_color = float4(1.0, 1.0, 1.0, 1.0);
 constant float4 materialSpecularColor = float4(1.0, 1.0, 1.0, 1.0);
@@ -71,9 +76,25 @@ vertex OutVertex vertexShader(const device InVertex* vertex_array [[buffer(0)]],
     
     return vertexOut;
 }
-vertex OutVertex vertexShader_Static(const device packed_float3* vertex_array [[buffer(0)]],const device uniform_buffer& mvp[[buffer(1)]],unsigned int vid [[vertex_id]]){
+vertex OutVertex vertexShader_Static(const device InVertexStatic* vertex_array [[buffer(0)]],const device uniform_buffer& mvp[[buffer(1)]],unsigned int vid [[vertex_id]]){
     OutVertex vertexOut;
-    vertexOut.position = mvp.p * mvp.v * float4x4(1.0) * float4(float3(vertex_array[vid]),1.0);
+    float4x4 model_matrix = mvp.m;
+    float4x4 view_matrix  = mvp.v;
+    float4x4 projection_matrix = mvp.p;
+    float4x4 model_view_matrx = mvp.v * model_matrix;
+    float4x4 mvp_matrix = mvp.p * model_view_matrx;
+    
+    //计算坐标（VP中的位置）
+    vertexOut.position = mvp_matrix * float4(float3((vertex_array[vid]).position),1.0);
+    //计算发现在camera中的位置
+    float3 normal = vertex_array[vid].normal;
+    vertexOut.normal_camerasapce = (normalize(model_view_matrx * float4(normal,0.0))).xyz;
+    //计算观察向量（V中）
+    float3 vertex_position_cameraspace = (model_view_matrx * float4(float3(vertex_array[vid].position),1.0)).xyz;
+    vertexOut.eye_direnction_cameraspace = float3(0.0,0.0,0.0) - vertex_position_cameraspace;
+    //计算光线方向在(V中)
+    float3 light_position_camerasapce = (view_matrix * float4(Light_Position,1.0f)).xyz;
+    vertexOut.light_direction_camerasapce = light_position_camerasapce + vertexOut.eye_direnction_cameraspace;
     return vertexOut;
 }
 
@@ -97,10 +118,31 @@ fragment half4 phong_fragment(OutVertex in [[stage_in]]){
     return color;
 }
 
+fragment half4 phong_fragment_static(OutVertex in [[stage_in]]){
+    half4 color;
+    
+    //计算漫反射
+    float3 n = normalize(in.normal_camerasapce);
+    float3 l = normalize(in.light_direction_camerasapce);
+    auto n_dot_l = saturate(dot(n,l));
+    float4 diffuse_color = light_color * n_dot_l * materialDiffuseColor;
+    
+    //计算全反射
+    
+    float3 e = normalize(in.eye_direnction_cameraspace);
+    float3 r = -l + 2.0 * n_dot_l * n;
+    float e_dot_r = saturate(dot(e,r));
+    float4 specular_color = materialSpecularColor * light_color * pow(e_dot_r,materialShine);
+    
+    color = half4(float4(0.15,0.85,0.1,1.0) + diffuse_color + specular_color);
+    return color;
+}
+
+
 fragment half4 fragmentShader1(OutVertex inFrag [[stage_in]]){
     return half4(0.1,0.2,0.8,1.0);
 }
 
 fragment half4 fragmentShader2(OutVertex inFrag [[stage_in]]){
-    return half4(0.1,0.5,0.2,1.0);
+    return half4(0.1,0.65,0.1,0.4);
 }
