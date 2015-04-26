@@ -88,19 +88,20 @@ class MTLMesh:NSObject {
         }
         //prepareRenderPipeLineStateWithShaderName(device, vertexShader: vertexShader, fragmentShader: fragmentShader)
     }
-    func prepareRenderPipeLineStateWithShaderName(device:MTLDevice,vertexShader:String,fragmentShader:String,depthPixelFormat:MTLPixelFormat){
+    func prepareRenderPipeLineStateWithShaderName(device:MTLDevice,vertexShader:String,fragmentShader:String,depthPixelFormat:MTLPixelFormat,renderPipeLineDescriptor:MTLRenderPipelineDescriptor){
         let library = device.newDefaultLibrary()
         if library == nil{
             return
         }
         var vertexShader = library!.newFunctionWithName(vertexShader)
         var fragmentShader = library!.newFunctionWithName(fragmentShader)
-        var renderPipeLineDescriptor = MTLRenderPipelineDescriptor()
+        //var renderPipeLineDescriptor = MTLRenderPipelineDescriptor()
         renderPipeLineDescriptor.vertexFunction = vertexShader
         renderPipeLineDescriptor.fragmentFunction = fragmentShader
         renderPipeLineDescriptor.colorAttachments[0].pixelFormat = MTLPixelFormat.BGRA8Unorm
         renderPipeLineDescriptor.depthAttachmentPixelFormat = depthPixelFormat
         var error:NSErrorPointer
+        renderPipeLineDescriptor.stencilAttachmentPixelFormat = MTLPixelFormat.Stencil8
         m_renderPipeLineState = device.newRenderPipelineStateWithDescriptor(renderPipeLineDescriptor, error: nil)
     }
     
