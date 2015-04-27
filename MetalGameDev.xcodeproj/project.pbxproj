@@ -25,6 +25,7 @@
 		5735C9E41AE62BDC00703391 /* shader.metal in Sources */ = {isa = PBXBuildFile; fileRef = 5735C9E31AE62BDC00703391 /* shader.metal */; };
 		577EE6F51AE617D200BE78F4 /* MTLCamera.swift in Sources */ = {isa = PBXBuildFile; fileRef = 577EE6F41AE617D200BE78F4 /* MTLCamera.swift */; };
 		5797B5251AE6B65A0051A2B4 /* animation1.json in Resources */ = {isa = PBXBuildFile; fileRef = 5797B5241AE6B65A0051A2B4 /* animation1.json */; };
+		57ABF1A41AED3A6D0032AE6D /* MTLTextureLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57ABF1A31AED3A6D0032AE6D /* MTLTextureLoader.swift */; };
 		57C1E2AD1AE6A4E300BCD75A /* animation.json in Resources */ = {isa = PBXBuildFile; fileRef = 57C1E2AC1AE6A4E300BCD75A /* animation.json */; };
 /* End PBXBuildFile section */
 
@@ -62,6 +63,7 @@
 		577EE6F41AE617D200BE78F4 /* MTLCamera.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MTLCamera.swift; sourceTree = "<group>"; };
 		577EE6F61AE618A400BE78F4 /* MetalGameDev-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MetalGameDev-Bridging-Header.h"; sourceTree = "<group>"; };
 		5797B5241AE6B65A0051A2B4 /* animation1.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = animation1.json; sourceTree = "<group>"; };
+		57ABF1A31AED3A6D0032AE6D /* MTLTextureLoader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MTLTextureLoader.swift; sourceTree = "<group>"; };
 		57C1E2AC1AE6A4E300BCD75A /* animation.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = animation.json; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -116,6 +118,7 @@
 				572E80F01AE904310093869D /* Asset1.swift */,
 				57270BE41AE6167500AAE3F2 /* Math.swift */,
 				57270BE61AE6167F00AAE3F2 /* MTLUniform.swift */,
+				57ABF1A31AED3A6D0032AE6D /* MTLTextureLoader.swift */,
 				57C1E2AC1AE6A4E300BCD75A /* animation.json */,
 				5797B5241AE6B65A0051A2B4 /* animation1.json */,
 				5735C9E31AE62BDC00703391 /* shader.metal */,
@@ -262,6 +265,7 @@
 				57270BE31AE6166E00AAE3F2 /* MetalAnimationController.swift in Sources */,
 				5735C9E41AE62BDC00703391 /* shader.metal in Sources */,
 				57270BE11AE6165E00AAE3F2 /* MetalMesh.swift in Sources */,
+				57ABF1A41AED3A6D0032AE6D /* MTLTextureLoader.swift in Sources */,
 				57270BE71AE6167F00AAE3F2 /* MTLUniform.swift in Sources */,
 				57270BDD1AE6162D00AAE3F2 /* MetalGamePlayer.swift in Sources */,
 				577EE6F51AE617D200BE78F4 /* MTLCamera.swift in Sources */,

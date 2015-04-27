@@ -104,7 +104,7 @@ class MTLGameScene:UIView,MTLGameViewControllerDelegate{
         }
         return m_drawable!
     }
-    func setRenderPassDescriptorWithTexture(texture:MTLTexture){
+    func setRenderPassDescriptorWithTexture(texture:MTLTexture)->MTLRenderPassDescriptor{
         // create lazily
         if (m_renderPassDesc == nil)
         {
@@ -123,7 +123,7 @@ class MTLGameScene:UIView,MTLGameViewControllerDelegate{
         
         // if sample count is greater than 1, render into using MSAA,
         // then resolve into our color texture
-        if (m_sampleCount > 1)
+        /*if (m_sampleCount > 1)
         {
             var doUpdate:Bool = false
             if (m_msaaTex == nil)
@@ -250,7 +250,9 @@ class MTLGameScene:UIView,MTLGameViewControllerDelegate{
                 stencilAttachment.storeAction = MTLStoreAction.DontCare
                 stencilAttachment.clearStencil = 0
             }
-        } //stencil
+        }*/
+        //stencil
+        return m_renderPassDesc!
     }
     
     
@@ -287,12 +289,12 @@ class MTLGameScene:UIView,MTLGameViewControllerDelegate{
     }
     
     func rotate(viewController: MTLGameViewController, rotateX: Float, rotateY: Float) {
-        m_modelMatrix.translate(0, y: rotateX/100, z: 0)
+        m_modelMatrix.rotate(rotateX/100, r: [0,0,1])
         println("X:\(rotateX)")
         println("Y:\(rotateY)")
         
-        m_mvpMatrix[0...15] = m_modelMatrix.raw()[0...15]
-        m_uniform.updateDataToUniform(m_mvpMatrix, toUniform: m_uniform[m_player!.m_currentUniform!])
+        m_player.m_aaPerspective[0...15] = m_modelMatrix.raw()[0...15]
+        m_player.m_renderToScreenUniform.updateDataToUniform(m_player.m_aaPerspective, toUniform: m_player.m_renderToScreenUniform[m_player!.m_currentUniform!])
     }
     
     func pause(viewController: MTLGameViewController, willPause: Bool) {

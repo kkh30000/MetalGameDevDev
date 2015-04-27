@@ -70,7 +70,7 @@ class MTLGameViewController: UIViewController {
             let deltaX = Float((currentPanPos.x - lastPanLocation.x)) / Float((self.view.bounds.size.width)) * panSensitity
             let deltaY = Float((currentPanPos.y - lastPanLocation.y)) / Float((self.view.bounds.size.height)) * panSensitity
             self.lastPanLocation = currentPanPos
-            self.m_delegate.rotate(self, rotateX: deltaX, rotateY: deltaY)
+            //self.m_delegate.rotate(self, rotateX: deltaX, rotateY: deltaY)
         }else if panGesture.state == UIGestureRecognizerState.Began{
             self.lastPanLocation = panGesture.locationInView(self.view)
         }

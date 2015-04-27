@@ -81,9 +81,6 @@ class Matrix:NSObject {
         matrix.m_raw[3][1] = 0.0
         matrix.m_raw[3][2] = -sDepth * near
         matrix.m_raw[3][3] = 0.0
-        
-        
-        
         return matrix
     }
     

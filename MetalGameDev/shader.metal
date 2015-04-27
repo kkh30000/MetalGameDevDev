@@ -188,6 +188,37 @@ fragment half4 phong_fragment_static(OutVertex in [[stage_in]],depth2d<float> sh
     return color;
 }
 
+struct FinalVertexIn{
+    packed_float3 position;
+    packed_float2 texCoord;
+};
+
+struct FinalVertexOut{
+    float4 m_Position [[position]];
+    float2 m_TexCoord ;
+};
+
+vertex FinalVertexOut render_to_screen_vertex(const device FinalVertexIn* vertex_array [[buffer(0)]],const device uniform_buffer& mvp [[buffer(1)]],unsigned int vid [[vertex_id]]){
+    FinalVertexOut vertexOut;
+    
+    
+    
+    float4x4 bais;
+    bais[0] = float4(0.5,0,0,0);
+    bais[1] = float4(0,-0.5,0,0);
+    bais[2] = float4(0,0,1,0);
+    bais[3] = float4(0.5,0.5,0,1);
+    vertexOut.m_Position = mvp.p * mvp.v * mvp.m * float4(float3(vertex_array[vid].position),1.0);
+    vertexOut.m_TexCoord = vertex_array[vid].texCoord;
+    return vertexOut;
+}
+fragment half4 render_to_screen_fragment(FinalVertexOut in [[stage_in]],texture2d<half> tex2D [[texture(0)]]){
+    constexpr sampler finalSampler;
+    half4 color = tex2D.sample(finalSampler,in.m_TexCoord);
+    return color;
+}
+
+
 
 fragment half4 fragmentShader1(OutVertex inFrag [[stage_in]]){
     return half4(0.1,0.2,0.8,1.0);
