@@ -23,6 +23,7 @@
 		57270BE91AE616DF00AAE3F2 /* Asset.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57270BE81AE616DF00AAE3F2 /* Asset.swift */; };
 		572E80F11AE904310093869D /* Asset1.swift in Sources */ = {isa = PBXBuildFile; fileRef = 572E80F01AE904310093869D /* Asset1.swift */; };
 		5735C9E41AE62BDC00703391 /* shader.metal in Sources */ = {isa = PBXBuildFile; fileRef = 5735C9E31AE62BDC00703391 /* shader.metal */; };
+		574FC1741AEFD9ED00D0CD9C /* ck.json in Resources */ = {isa = PBXBuildFile; fileRef = 574FC1731AEFD9ED00D0CD9C /* ck.json */; };
 		577EE6F51AE617D200BE78F4 /* MTLCamera.swift in Sources */ = {isa = PBXBuildFile; fileRef = 577EE6F41AE617D200BE78F4 /* MTLCamera.swift */; };
 		5797B5251AE6B65A0051A2B4 /* animation1.json in Resources */ = {isa = PBXBuildFile; fileRef = 5797B5241AE6B65A0051A2B4 /* animation1.json */; };
 		57ABF1A41AED3A6D0032AE6D /* MTLTextureLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57ABF1A31AED3A6D0032AE6D /* MTLTextureLoader.swift */; };
@@ -60,6 +61,7 @@
 		57270BE81AE616DF00AAE3F2 /* Asset.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Asset.swift; sourceTree = "<group>"; };
 		572E80F01AE904310093869D /* Asset1.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Asset1.swift; sourceTree = "<group>"; };
 		5735C9E31AE62BDC00703391 /* shader.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = shader.metal; sourceTree = "<group>"; };
+		574FC1731AEFD9ED00D0CD9C /* ck.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = ck.json; sourceTree = "<group>"; };
 		577EE6F41AE617D200BE78F4 /* MTLCamera.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MTLCamera.swift; sourceTree = "<group>"; };
 		577EE6F61AE618A400BE78F4 /* MetalGameDev-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MetalGameDev-Bridging-Header.h"; sourceTree = "<group>"; };
 		5797B5241AE6B65A0051A2B4 /* animation1.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = animation1.json; sourceTree = "<group>"; };
@@ -120,6 +122,7 @@
 				57270BE61AE6167F00AAE3F2 /* MTLUniform.swift */,
 				57ABF1A31AED3A6D0032AE6D /* MTLTextureLoader.swift */,
 				57C1E2AC1AE6A4E300BCD75A /* animation.json */,
+				574FC1731AEFD9ED00D0CD9C /* ck.json */,
 				5797B5241AE6B65A0051A2B4 /* animation1.json */,
 				5735C9E31AE62BDC00703391 /* shader.metal */,
 				57270BBC1AE615A700AAE3F2 /* Main.storyboard */,
@@ -240,6 +243,7 @@
 				57270BBE1AE615A700AAE3F2 /* Main.storyboard in Resources */,
 				5797B5251AE6B65A0051A2B4 /* animation1.json in Resources */,
 				57270BC31AE615A700AAE3F2 /* LaunchScreen.xib in Resources */,
+				574FC1741AEFD9ED00D0CD9C /* ck.json in Resources */,
 				57C1E2AD1AE6A4E300BCD75A /* animation.json in Resources */,
 				57270BC01AE615A700AAE3F2 /* Images.xcassets in Resources */,
 			);

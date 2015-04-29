@@ -84,7 +84,7 @@ class MTLGamePlayer: NSObject{
         m_lightProjcetion = [Float](count: 48, repeatedValue: 0.0)
         var modelMatrix = Matrix()
         m_lightProjcetion[0...15] = modelMatrix.raw()[0...15]
-        var light = MTLCamera(pos: [200,300,-200], target: [0,0,0], up: [0,1,0])
+        var light = MTLCamera(pos: [200,800,200], target: [0,0,0], up: [0,1,0])
         m_lightProjcetion[16...31] = light.viewMatrix().raw()[0...15]
         //light.viewMatrix().translate(0.5, y: 0.5, z: 0.0)
         //light.viewMatrix().scale(0.5, y: -0.5, z: 1.0)
@@ -130,8 +130,11 @@ class MTLGamePlayer: NSObject{
         renderPipeLineStateDesc.fragmentFunction = nil
         renderPipeLineStateDesc.depthAttachmentPixelFormat = m_shadowMap!.pixelFormat
         m_shadowRenderPipelineState = m_scene!.m_device!.newRenderPipelineStateWithDescriptor(renderPipeLineStateDesc, error: nil)
-       
+        renderPipeLineStateDesc.label = "Shadow Map Static"
         renderPipeLineStateDesc.vertexFunction! = m_scene!.m_device!.newDefaultLibrary()!.newFunctionWithName("shadow_mapping_vertex_shader_static")!
+        renderPipeLineStateDesc.colorAttachments[0] = nil
+        renderPipeLineStateDesc.fragmentFunction = nil
+        renderPipeLineStateDesc.depthAttachmentPixelFormat = m_shadowMap!.pixelFormat
         m_shadowRenderPipelineStateStatic = m_scene!.m_device!.newRenderPipelineStateWithDescriptor(renderPipeLineStateDesc, error: nil)
         
         //Second Pass:Render Into Texture
@@ -169,7 +172,7 @@ class MTLGamePlayer: NSObject{
         //m_scene!.m_uniform.updateDataToUniform(m_lightProjcetion, toUniform: m_lightUniform[m_currentUniform!])
         
         var paraCommanderEncoder = commandBuffer.parallelRenderCommandEncoderWithDescriptor(m_shadowRenderPassDesc)
-        paraCommanderEncoder!.pushDebugGroup("Shadow Mapping")
+        //paraCommanderEncoder!.pushDebugGroup("Shadow Mapping")
         var paraCommandEncoders :[MTLRenderCommandEncoder] = []
         
         for var i = 0 ; i < m_actors!.count ; ++i{
@@ -180,11 +183,13 @@ class MTLGamePlayer: NSObject{
         for var i = 0; i < m_actors!.count ; ++i{
             if m_actors![i].m_animationController != nil{
                 paraCommandEncoders[i].setRenderPipelineState(m_shadowRenderPipelineState)
+                paraCommandEncoders[i].setCullMode(MTLCullMode.None)
             }else{
                 paraCommandEncoders[i].setRenderPipelineState(m_shadowRenderPipelineStateStatic)
+                paraCommandEncoders[i].setCullMode(MTLCullMode.Back)
             }
             paraCommandEncoders[i].setDepthStencilState(m_shadowDepthStencilState!)
-            paraCommandEncoders[i].setCullMode(MTLCullMode.Back)
+            
             paraCommandEncoders[i].setDepthBias(0.01, slopeScale: 1.0, clamp: 0.01)
             paraCommandEncoders[i].setVertexBuffer(m_lightUniform[m_currentUniform!], offset: 0, atIndex: 1)
             if m_actors![i].m_animationController != nil{
@@ -208,7 +213,7 @@ class MTLGamePlayer: NSObject{
         m_aaRenderPassDsc.colorAttachments[0].texture = m_aaTexture
         m_aaRenderPassDsc.colorAttachments[0].loadAction = MTLLoadAction.DontCare
         m_aaRenderPassDsc.colorAttachments[0].storeAction = MTLStoreAction.DontCare
-        m_aaRenderPassDsc.colorAttachments[0].clearColor = MTLClearColorMake(0.9, 0.3, 0.2, 1.0)
+        m_aaRenderPassDsc.colorAttachments[0].clearColor = MTLClearColorMake(0.65, 0.3, 0.25, 1.0)
         let desc = MTLTextureDescriptor.texture2DDescriptorWithPixelFormat(
             m_stencilPixelFormat!,
             width: m_aaTexture.width,
@@ -255,7 +260,7 @@ class MTLGamePlayer: NSObject{
             paraCommandEncoders.append(paraCommanderEncoder!.renderCommandEncoder())
         }
         for var i = 0; i < m_actors!.count ; ++i{
-            paraCommandEncoders[i].setCullMode(MTLCullMode.Front)
+            paraCommandEncoders[i].setCullMode(MTLCullMode.None)
             if m_actors![i].m_mesh.m_depthType != MTLPixelFormat.Invalid{
                 paraCommandEncoders[i].setDepthStencilState(m_depthState!)
             }
@@ -318,6 +323,7 @@ class MTLGamePlayer: NSObject{
         }
         commandBuffer.presentDrawable(scene.m_drawable!)
         commandBuffer.commit()
+        
         m_currentUniform = (m_currentUniform! + 1) % 3
     }
 }

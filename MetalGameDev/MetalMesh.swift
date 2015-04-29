@@ -13,19 +13,30 @@ import Metal
 class MeshAssets:NSObject {
     var m_vertexArray:[Float]?
     var m_vertexIndices:[UInt16]?
-    var m_textureCoord:[Float]?
+    //var m_jsonDict:NSDictionary! = nil
     
     
     
-    init(vertexArray:[Float],indices:[UInt16]?,texutureCoord:[Float]?) {
+    init(filePath:String){
+        super.init()
+        var meshData = NSData(contentsOfURL: NSBundle.mainBundle().URLForResource(filePath, withExtension: "json")!)
+        //var error = NSErrorPointer()
+        var jsonDict = NSJSONSerialization.JSONObjectWithData(meshData!, options: NSJSONReadingOptions.AllowFragments, error: nil) as! NSDictionary
+        m_vertexArray = jsonDict.objectForKey("vertex") as? [Float]
+        var vertexIndices = jsonDict.objectForKey("indices") as? [Int]
+        m_vertexIndices = [UInt16](count: vertexIndices!.count, repeatedValue: 0)
+        for var i = 0 ; i < vertexIndices!.count ; ++i{
+            m_vertexIndices![i] = UInt16(vertexIndices![i])
+        }
+    }
+    
+    init(vertexArray:[Float],indices:[UInt16]?) {
         super.init()
         m_vertexArray = vertexArray
         if indices != nil{
             m_vertexIndices = indices
         }
-        if texutureCoord != nil{
-            m_textureCoord = texutureCoord
-        }
+        
     }
     
     func arrayLength<T>(array:[T])->Int{
@@ -39,15 +50,6 @@ class MeshAssets:NSObject {
     func vertexIndicesLength()->Int{
         return arrayLength(m_vertexIndices!)
     }
-    
-    func textureCoordLength()->Int{
-        if m_textureCoord != nil{
-            return arrayLength(m_textureCoord!)
-        }else{
-            return -1
-        }
-    }
-    
     
 }
 
@@ -82,9 +84,6 @@ class MTLMesh:NSObject {
         m_vertexBuffer = device.newBufferWithBytes(meshAsset.m_vertexArray!, length: meshAsset.vertexArrayLength(), options: nil)
         if m_meshAssets.m_vertexIndices != nil{
             m_indexBuffer = device.newBufferWithBytes(meshAsset.m_vertexIndices!, length: meshAsset.vertexIndicesLength(), options: nil)
-        }
-        if meshAsset.m_textureCoord != nil{
-            m_textureCoordBuffer = device.newBufferWithBytes(meshAsset.m_textureCoord!, length: meshAsset.textureCoordLength(), options: nil)
         }
         //prepareRenderPipeLineStateWithShaderName(device, vertexShader: vertexShader, fragmentShader: fragmentShader)
     }

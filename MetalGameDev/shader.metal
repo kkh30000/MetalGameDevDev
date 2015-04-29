@@ -30,7 +30,7 @@ struct InVertexStatic{
 };
 //常量
 
-constant float3 Light_Position = float3(0,400,0);
+constant float3 Light_Position = float3(200,800,200);
 constant float4 materialAmbientColor = float4(0.15, 0.15, 0.15, 1.0);
 constant float4 materialDiffuseColor = float4(0.4, 0.4, 0.4, 1.0);
 constant float4 light_color = float4(1.0, 1.0, 1.0, 1.0);
@@ -183,10 +183,33 @@ fragment half4 phong_fragment_static(OutVertex in [[stage_in]],depth2d<float> sh
     float3 r = -l + 2.0 * n_dot_l * n;
     float e_dot_r = saturate(dot(e,r));
     float4 specular_color = materialSpecularColor * light_color * pow(e_dot_r,materialShine);
-    color = half4(half3(float3(0.15,0.85,0.1) + shadow * (diffuse_color.rgb + specular_color.rgb)),1.0);
+    color = half4(half3(float3(0.15,0.75,0.15) + shadow * (diffuse_color.rgb + specular_color.rgb)),1.0);
     //color = half4(float4(0.15,0.85,0.1,1.0) + diffuse_color + specular_color);
     return color;
 }
+fragment half4 phong_fragment_static_1(OutVertex in [[stage_in]],depth2d<float> shadow_texture [[texture(0)]]){
+    half4 color;
+    
+    constexpr sampler shadow_sampler(coord::normalized, filter::linear, address::clamp_to_edge, compare_func::less);
+    
+    float shadow = shadow_texture.sample_compare(shadow_sampler, in.v_shadowcoord.xy/in.v_shadowcoord.w, in.v_shadowcoord.z/in.v_shadowcoord.w);
+    //计算漫反射
+    float3 n = normalize(in.normal_camerasapce);
+    float3 l = normalize(in.light_direction_camerasapce);
+    auto n_dot_l = saturate(dot(n,l));
+    float4 diffuse_color = light_color * n_dot_l * materialDiffuseColor;
+    
+    //计算全反射
+    
+    float3 e = normalize(in.eye_direnction_cameraspace);
+    float3 r = -l + 2.0 * n_dot_l * n;
+    float e_dot_r = saturate(dot(e,r));
+    float4 specular_color = materialSpecularColor * light_color * pow(e_dot_r,materialShine);
+    color = half4(half3(float3(0.15,0.15,0.15) + shadow * (diffuse_color.rgb + specular_color.rgb)),1.0);
+    //color = half4(float4(0.15,0.85,0.1,1.0) + diffuse_color + specular_color);
+    return color;
+}
+
 
 struct FinalVertexIn{
     packed_float3 position;
