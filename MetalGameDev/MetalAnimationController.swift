@@ -28,7 +28,7 @@ class MTLAnimationController: NSObject{
         }
         //m_frames = [[Float]](jsonSwift1.values)
         m_frameCount = m_frames.count
-        m_uniformBuffer = MTLUniform(size: sizeofValue(m_frames[0][0]) * m_frames.count * m_frames[0].count, device: scene.m_device!)
+        m_uniformBuffer = MTLUniform(size: sizeofValue(m_frames[0][0]) * m_frames.count * m_frames[0].count, device: scene.m_device!) as MTLUniform
         for var i = 0 ; i < 3 ; ++i{
             m_uniformBuffer.updateDataToUniform(m_frames[0], toUniform: m_uniformBuffer[i])
         }

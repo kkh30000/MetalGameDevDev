@@ -27,10 +27,10 @@ class MTLGameScene:UIView,MTLGameViewControllerDelegate{
     var m_drawable:CAMetalDrawable?
     
     var m_player:MTLGamePlayer! = nil
-    var m_mvpMatrix:[Float]! = nil
+    //var m_mvpMatrix:[Float]! = nil
     var m_modelMatrix:Matrix! = nil
-    var m_viewMatrix:Matrix! = nil
-    var m_uniform:MTLUniform! = nil
+    //var m_viewMatrix:Matrix! = nil
+    var m_uniform:MTLMVPUniform! = nil
     
     var m_cameraProjection:[Float]! = nil
     var m_lightProjection:[Float]! = nil
@@ -79,25 +79,9 @@ class MTLGameScene:UIView,MTLGameViewControllerDelegate{
         var actor2 = MTLActor(mesh: mesh1, animationController: nil)
         var actor3 = MTLActor(mesh: mesh2, animationController: nil)
         //var actor1 = MTLActor(mesh: mesh1, animationController: nil)
-        
-        m_mvpMatrix = [Float](count: 48, repeatedValue: 0.0)
         m_modelMatrix = Matrix()
-        m_modelMatrix.translate(0, y: -50, z: 0)
-        m_mvpMatrix[0...15] = m_modelMatrix.raw()[0...15]
-        m_camera = MTLCamera(pos: [400,400,400], target: [0,0,0], up: [0,1,0])
-        m_mvpMatrix[16...31] = m_camera.viewMatrix().raw()[0...15]
-        m_mvpMatrix[32...47] = Matrix.MatrixMakeFrustum_oc(-1.01, right: 1.01, bottom: -1.01 , top: +1.01 , near: 1.01, far:-1.01).raw()[0...15]
-        m_cameraProjection = m_mvpMatrix
-        //m_animUniform = MTLUniform(size: sizeofValue(m_animArray[0]) * m_animArray.count , device: m_device!)
-        m_uniform = MTLUniform(size: sizeofValue(m_mvpMatrix[0]) * m_mvpMatrix.count, device: m_device!)
-        for var i = 0 ; i < 3 ; ++i{
-            m_uniform.updateDataToUniform(m_mvpMatrix, toUniform: m_uniform[i])
-        }
-        /*for var i = 0 ; i < 3 ; ++i{
-        m_animUniform.updateDataToUniform(m_animArray, toUniform: m_animUniform[i])
-        }*/
-        
         m_player = MTLGamePlayer(scene: self)
+        m_uniform = MTLMVPUniform(model: Matrix(), view: MTLCamera(pos: [400,400,400], target: [0,0,0], up: [0,1,0]).viewMatrix(), projection: Matrix.MatrixMakeFrustum_oc(-1.01, right: 1.01, bottom: -1.01, top: 1.01, near: 1.01, far: -1.01), device: m_device!, player: m_player)
         m_player!.prepareActors([actor2,actor1,actor4])
         
     }
@@ -284,8 +268,8 @@ class MTLGameScene:UIView,MTLGameViewControllerDelegate{
     
     func updatePerFrame(viewcontroller: MTLGameViewController) {
         m_modelMatrix.rotate(0.5, r: [0,1,0])
-        m_mvpMatrix[0...15] = m_modelMatrix.raw()[0...15]
-        m_uniform.updateDataToUniform(m_mvpMatrix, toUniform: m_uniform[m_player!.m_currentUniform!])
+        m_uniform.setModelMatrix(m_modelMatrix.raw())
+        m_uniform.updateDataToUniform(m_uniform.m_mvpMatrix, toUniform: m_uniform[m_player!.m_currentUniform!])
         m_player.m_actors![1].m_animationController!.play(viewcontroller.m_gameTime, currentBuffer: m_player.m_currentUniform!)
         m_player.m_actors![2].m_animationController!.play(viewcontroller.m_gameTime * 0.8, currentBuffer: m_player.m_currentUniform!)
         
@@ -296,8 +280,8 @@ class MTLGameScene:UIView,MTLGameViewControllerDelegate{
         println("X:\(rotateX)")
         println("Y:\(rotateY)")
         
-        m_player.m_aaPerspective[0...15] = m_modelMatrix.raw()[0...15]
-        m_player.m_renderToScreenUniform.updateDataToUniform(m_player.m_aaPerspective, toUniform: m_player.m_renderToScreenUniform[m_player!.m_currentUniform!])
+        //m_player.m_aaPerspective[0...15] = m_modelMatrix.raw()[0...15]
+        //m_player.m_renderToScreenUniform.updateDataToUniform(m_player.m_aaPerspective, toUniform: m_player.m_renderToScreenUniform[m_player!.m_currentUniform!])
     }
     
     func pause(viewController: MTLGameViewController, willPause: Bool) {

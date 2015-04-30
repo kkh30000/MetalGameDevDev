@@ -30,7 +30,7 @@ class MTLGamePlayer: NSObject{
     
     var m_aaTexture:MTLTexture! = nil
     var m_aaRenderPassDsc:MTLRenderPassDescriptor! = nil
-    var m_aaPerspective:[Float]! = nil
+    //var m_aaPerspective:[Float]! = nil
     
     var m_renderToScreenPass:MTLRenderPassDescriptor! = nil
     var m_renderToScreenPiplelineState:MTLRenderPipelineState! = nil
@@ -43,10 +43,10 @@ class MTLGamePlayer: NSObject{
          1.0,-1.0, 1, 1.0,1.0,
     ]
     var m_renderToVertexBuffer:MTLBuffer! = nil
-    var m_renderToScreenUniform:MTLUniform! = nil
+    var m_renderToScreenUniform:MTLMVPUniform! = nil
     
-    var m_lightProjcetion:[Float]! = nil
-    var m_lightUniform:MTLUniform! = nil
+    //var m_lightProjcetion:[Float]! = nil
+    var m_lightUniform:MTLMVPUniform! = nil
     init(scene:MTLGameScene) {
         super.init()
         m_scene = scene
@@ -66,17 +66,6 @@ class MTLGamePlayer: NSObject{
         
         //Pass2：disable z-write, enable z-test/stencil-write 。渲染 shadow volume, 对于它的 back face ，如果 z-test 的结果是fail, stencil 值加1，如果 z-test 的结果是 pass，stencil 值不变。对于 front face，如果z-test 的结果是 fail，stencil 值减1 ，如果结果是 pass，stencil 值不变。        
         depthDecs.depthWriteEnabled = true
-        //stencilState.stencilCompareFunction = MTLCompareFunction.Always
-        //stencilState.stencilFailureOperation = MTLStencilOperation.IncrementClamp
-        //stencilState.depthFailureOperation  = MTLStencilOperation.IncrementClamp
-        //stencilState.depthStencilPassOperation = MTLStencilOperation.Keep
-        //depthDecs.backFaceStencil = stencilState;
-        //stencilState.depthFailureOperation = MTLStencilOperation.DecrementClamp
-        //stencilState.depthStencilPassOperation = MTLStencilOperation.Keep
-        //depthDecs.frontFaceStencil = stencilState;
-        //stencilState.readMask = 0xFF;
-        //stencilState.writeMask = 0xFF;
-        //depthDecs.depthCompareFunction = MTLCompareFunction.LessEqual;
         m_depthState = scene.m_device!.newDepthStencilStateWithDescriptor(depthDecs)
         m_semaphore = dispatch_semaphore_create(3)
         
@@ -84,39 +73,11 @@ class MTLGamePlayer: NSObject{
         m_currentUniform = 0
         
         //初始化light pespetive
-        m_lightProjcetion = [Float](count: 48, repeatedValue: 0.0)
-        var modelMatrix = Matrix()
-        m_lightProjcetion[0...15] = modelMatrix.raw()[0...15]
-        var light = MTLCamera(pos: [200,800,200], target: [0,0,0], up: [0,1,0])
-        m_lightProjcetion[16...31] = light.viewMatrix().raw()[0...15]
-        //light.viewMatrix().translate(0.5, y: 0.5, z: 0.0)
-        //light.viewMatrix().scale(0.5, y: -0.5, z: 1.0)
-        //light.viewMatrix().scale(0.001, y: 0.001, z: 0.001)
-        m_lightProjcetion[32...47] = Matrix.MatrixMakeFrustum_oc(-1, right: 1, bottom: -1 , top: +1 , near: 100, far:10000).raw()[0...15]
-        m_lightUniform = MTLUniform(size: sizeofValue(m_lightProjcetion[0]) * m_lightProjcetion.count, device: m_scene!.m_device!)
-        
-        m_renderToScreenUniform = MTLUniform(size: sizeofValue(m_lightProjcetion[0]) * m_lightProjcetion.count, device: m_scene!.m_device!)
-        
-        //初始化aa perspective
-        m_aaPerspective = [Float](count: 48, repeatedValue: 0.0)
-        let aspect = Float(m_scene!.frame.size.width) / Float(m_scene!.frame.size.height)
-        var aaModelMatrix = Matrix()
-        aaModelMatrix.scale(aspect, y: 1, z: 1)
-        m_aaPerspective[0...15] = aaModelMatrix.raw()[0...15]
-        m_aaPerspective[16...31]  = MTLCamera(pos: [0,0,0], target: [0,0,1], up: [0,1,0]).viewMatrix().raw()[0...15]
-        
-        //m_aaPerspective[32...47] = Matrix.MatrixMakeFrustum_oc(-(1 / aspect)  , right: 1 / aspect, bottom: -1, top: 1, near: 0.1, far: 10).raw()[0...15]
-        m_aaPerspective[32...47] = Matrix.MatrixMakePerpective_fov(90, aspect: Float(m_scene!.frame.size.width) / Float(m_scene!.frame.size.height), near: 0.1, far: 100).raw()[0...15]
-        
-        
-        for var i = 0 ; i < 3 ; ++i{
-            m_lightUniform.updateDataToUniform(m_lightProjcetion , toUniform: m_lightUniform[i])
-        }
-        for var i = 0 ; i < 3 ; ++i{
-            m_renderToScreenUniform.updateDataToUniform(m_aaPerspective, toUniform: m_renderToScreenUniform[i])
-        }
+        m_lightUniform = MTLMVPUniform(model: Matrix(), view: MTLCamera(pos: [200,800,200], target: [0,0,0], up: [0,1,0]).viewMatrix(), projection: Matrix.MatrixMakeFrustum_oc(-1, right: 1, bottom: -1, top: 1, near: 100, far: 10000), device: m_scene!.m_device!, player: self)
+        var modelView = Matrix()
+        modelView.scale(Float(m_scene!.frame.size.width) / Float(m_scene!.frame.size.height), y: 1, z: 1)
+        m_renderToScreenUniform = MTLMVPUniform(model: Matrix(), view: MTLCamera(pos: [0,0,0], target: [0,0,1], up: [0,1,0]).viewMatrix(), projection: Matrix.MatrixMakePerpective_fov(90, aspect: Float(m_scene!.frame.size.width)/Float(m_scene!.frame.size.width), near: 0.1, far: 1.00), device: m_scene!.m_device!, player: self)
 
-    
     }
     func prepareActors(actors:[MTLActor]){
         m_actors = actors
@@ -172,9 +133,8 @@ class MTLGamePlayer: NSObject{
     }
     func renderShadowMap(commandBuffer:MTLCommandBuffer){
         
-       
-        m_lightUniform.updateDataToUniform(m_lightProjcetion, toUniform: m_lightUniform[m_currentUniform!])
-        
+        m_lightUniform.update()
+        //m_lightUniform.updateDataToUniform(m_lightProjcetion, toUniform: m_lightUniform[m_currentUniform!])
         var paraCommanderEncoder = commandBuffer.parallelRenderCommandEncoderWithDescriptor(m_shadowRenderPassDesc)
         //paraCommanderEncoder!.pushDebugGroup("Shadow Mapping")
         var paraCommandEncoders :[MTLRenderCommandEncoder] = []
@@ -255,7 +215,7 @@ class MTLGamePlayer: NSObject{
 
     }
     func renderToTexture(commandBuffer:MTLCommandBuffer){
-         m_renderToScreenUniform.updateDataToUniform(m_scene!.m_mvpMatrix, toUniform: m_scene!.m_uniform[m_currentUniform!])
+         //m_renderToScreenUniform.update()
         
         var paraCommanderEncoder = commandBuffer.parallelRenderCommandEncoderWithDescriptor(m_aaRenderPassDsc)
         var paraCommandEncoders :[MTLRenderCommandEncoder] = []
@@ -293,7 +253,7 @@ class MTLGamePlayer: NSObject{
         
     }
     func renderToScreen(commandBuffer:MTLCommandBuffer){
-        m_renderToScreenUniform!.updateDataToUniform(m_aaPerspective, toUniform: m_renderToScreenUniform[m_currentUniform!])
+        m_renderToScreenUniform!.update()
         var enCoder = commandBuffer.renderCommandEncoderWithDescriptor(m_scene!.renderPassDescriptor())
         enCoder!.setFragmentTexture(m_aaTexture, atIndex: 0)
         enCoder!.setVertexBuffer(m_renderToVertexBuffer, offset: 0, atIndex: 0)

@@ -37,7 +37,10 @@ class MTLUniform: NSObject {
         }
     }
     
-    func updateDataToUniform(from : UnsafePointer<Void> ,toUniform:MTLBuffer){
+    func updateDataToUniform(from : UnsafePointer<Void> ,player:MTLGamePlayer){
+        memcpy(self[player.m_currentUniform!].contents(), from, m_bufferSize!)
+    }
+    func updateDataToUniform(from:UnsafePointer<Void>,toUniform:MTLBuffer){
         memcpy(toUniform.contents(), from, m_bufferSize!)
     }
 }
