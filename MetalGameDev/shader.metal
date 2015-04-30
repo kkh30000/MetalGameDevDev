@@ -57,14 +57,12 @@ vertex float4 shadow_mapping_vertex_shader(const device InVertex* vertex_array [
         animTranform = anim_uniform[static_cast<int>(vertex_array[vid].bone0)];
     }
     float4 pos = mvp.p * mvp.v * mvp.m * animTranform * float4(float3(vertex_array[vid].position),1.0);
-    //pos = pos/pos.w;
     return pos;
     
 }
 
 vertex float4 shadow_mapping_vertex_shader_static(const device InVertexStatic* vertex_array [[buffer(0)]],const device uniform_buffer& mvp[[buffer(1)]],unsigned int vid [[vertex_id]]){
     float4 pos = mvp.p * mvp.v * mvp.m * float4(float3(vertex_array[vid].position),1.0);
-    //pos = pos/pos.w;
     return pos;
 }
 
@@ -93,12 +91,12 @@ vertex OutVertex vertexShader(const device InVertex* vertex_array [[buffer(0)]],
     vertexOut.position = mvp_matrix * float4(float3((vertex_array[vid]).position),1.0);
     float4x4 bais;
     bais[0] = float4(0.5,0,0,0);
-    bais[1] = float4(0,-0.5,0,0);
-    bais[2] = float4(0,0,1,0);
+    bais[1] = float4(0,0.5,0,0);
+    bais[2] = float4(0,0,-0.5,0);
     bais[3] = float4(0.5,0.5,0,1);
     
 
-    vertexOut.v_shadowcoord = bais*light.p * light.v * light.m * float4(float3((vertex_array[vid]).position),1.0);
+    vertexOut.v_shadowcoord = bais * light.p * light.v * float4(float3((vertex_array[vid]).position),1.0);
     //计算发现在camera中的位置
     float3 normal = vertex_array[vid].normal;
     vertexOut.normal_camerasapce = (normalize(model_view_matrx * float4(normal,0.0))).xyz;
@@ -124,10 +122,10 @@ vertex OutVertex vertexShader_Static(const device InVertexStatic* vertex_array [
     float4x4 bais;
     bais[0] = float4(0.5,0,0,0);
     bais[1] = float4(0,-0.5,0,0);
-    bais[2] = float4(0,0,1,0);
-    bais[3] = float4(0.5,0.5,0,1);
+    bais[2] = float4(0,0,0.5,0);
+    bais[3] = float4(0.5,0.5,0.5,1);
     
-    vertexOut.v_shadowcoord = bais * light.p * light.v * light.m * float4(float3((vertex_array[vid]).position),1.0);
+    vertexOut.v_shadowcoord = bais * light.p * light.v *float4(float3((vertex_array[vid]).position),1.0);
     //计算发现在camera中的位置
     float3 normal = vertex_array[vid].normal;
     vertexOut.normal_camerasapce = (normalize(model_view_matrx * float4(normal,0.0))).xyz;
@@ -168,7 +166,7 @@ fragment half4 phong_fragment(OutVertex in [[stage_in]],depth2d<float> shadow_te
 fragment half4 phong_fragment_static(OutVertex in [[stage_in]],depth2d<float> shadow_texture [[texture(0)]]){
     half4 color;
     
-    constexpr sampler shadow_sampler(coord::normalized, filter::linear, address::clamp_to_edge, compare_func::less);
+    constexpr sampler shadow_sampler(coord::normalized, filter::linear, address::clamp_to_zero, compare_func::less_equal);
     
     float shadow = shadow_texture.sample_compare(shadow_sampler, in.v_shadowcoord.xy/in.v_shadowcoord.w, in.v_shadowcoord.z/in.v_shadowcoord.w);
     //计算漫反射
@@ -190,7 +188,7 @@ fragment half4 phong_fragment_static(OutVertex in [[stage_in]],depth2d<float> sh
 fragment half4 phong_fragment_static_1(OutVertex in [[stage_in]],depth2d<float> shadow_texture [[texture(0)]]){
     half4 color;
     
-    constexpr sampler shadow_sampler(coord::normalized, filter::linear, address::clamp_to_edge, compare_func::less);
+    constexpr sampler shadow_sampler(coord::normalized, filter::linear, address::clamp_to_zero, compare_func::less);
     
     float shadow = shadow_texture.sample_compare(shadow_sampler, in.v_shadowcoord.xy/in.v_shadowcoord.w, in.v_shadowcoord.z/in.v_shadowcoord.w);
     //计算漫反射

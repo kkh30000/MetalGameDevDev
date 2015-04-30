@@ -34,6 +34,6 @@ class MTLAnimationController: NSObject{
         }
     }
     func play(currentTime:CFTimeInterval,currentBuffer:Int){
-        m_uniformBuffer.updateDataToUniform(m_frames[Int(currentTime * 30) % m_frames.count], toUniform: m_uniformBuffer[currentBuffer])
+        m_uniformBuffer.updateDataToUniform(m_frames[Int(currentTime*30) % m_frames.count], toUniform: m_uniformBuffer[currentBuffer])
     }
 }
