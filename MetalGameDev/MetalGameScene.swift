@@ -82,7 +82,7 @@ class MTLGameScene:UIView,MTLGameViewControllerDelegate{
         m_modelMatrix = Matrix()
         m_player = MTLGamePlayer(scene: self)
         m_uniform = MTLMVPUniform(model: Matrix(), view: MTLCamera(pos: [400,400,400], target: [0,0,0], up: [0,1,0]).viewMatrix(), projection: Matrix.MatrixMakeFrustum_oc(-1.01, right: 1.01, bottom: -1.01, top: 1.01, near: 1.01, far: -1.01), device: m_device!, player: m_player)
-        m_player!.prepareActors([actor2,actor1,actor4])
+        m_player!.prepareActors([actorCK,actor1,actor4,actor2])
         
     }
     func currentDrawable()->CAMetalDrawable{

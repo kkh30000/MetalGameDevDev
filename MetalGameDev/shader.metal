@@ -33,7 +33,7 @@ struct InVertexStatic{
 constant float3 Light_Position = float3(200,800,200);
 constant float4 materialAmbientColor = float4(0.15, 0.15, 0.15, 1.0);
 constant float4 materialDiffuseColor = float4(0.4, 0.4, 0.4, 1.0);
-constant float4 light_color = float4(1.0, 1.0, 1.0, 1.0);
+constant float4 light_color = float4(0.0, 1.0, 1.0, 1.0);
 constant float4 materialSpecularColor = float4(1.0, 1.0, 1.0, 1.0);
 constant float materialShine = 500.0;
 //constant float4x4 bais = float4x4(float4(0.5,0,0,0),float4(0,0.5,0,0),float4(0,0,0.5,0),float4(0.5,0.5,0.5,1));
@@ -57,12 +57,14 @@ vertex float4 shadow_mapping_vertex_shader(const device InVertex* vertex_array [
         animTranform = anim_uniform[static_cast<int>(vertex_array[vid].bone0)];
     }
     float4 pos = mvp.p * mvp.v * mvp.m * animTranform * float4(float3(vertex_array[vid].position),1.0);
+   // pos = pos/pos.w;
     return pos;
     
 }
 
 vertex float4 shadow_mapping_vertex_shader_static(const device InVertexStatic* vertex_array [[buffer(0)]],const device uniform_buffer& mvp[[buffer(1)]],unsigned int vid [[vertex_id]]){
     float4 pos = mvp.p * mvp.v * mvp.m * float4(float3(vertex_array[vid].position),1.0);
+   // pos = pos/pos.w;
     return pos;
 }
 
@@ -91,9 +93,9 @@ vertex OutVertex vertexShader(const device InVertex* vertex_array [[buffer(0)]],
     vertexOut.position = mvp_matrix * float4(float3((vertex_array[vid]).position),1.0);
     float4x4 bais;
     bais[0] = float4(0.5,0,0,0);
-    bais[1] = float4(0,0.5,0,0);
-    bais[2] = float4(0,0,-0.5,0);
-    bais[3] = float4(0.5,0.5,0,1);
+    bais[1] = float4(0,-0.5,0,0);
+    bais[2] = float4(0,0,0.5,0);
+    bais[3] = float4(0.5,0.5,0.5,1);
     
 
     vertexOut.v_shadowcoord = bais * light.p * light.v * float4(float3((vertex_array[vid]).position),1.0);
@@ -140,9 +142,9 @@ vertex OutVertex vertexShader_Static(const device InVertexStatic* vertex_array [
 
 fragment half4 phong_fragment(OutVertex in [[stage_in]],depth2d<float> shadow_texture [[texture(0)]]){
     half4 color;
-    constexpr sampler shadow_sampler(coord::normalized, filter::linear, address::clamp_to_edge, compare_func::less);
-    
-    float shadow = shadow_texture.sample_compare(shadow_sampler, in.v_shadowcoord.xy/in.v_shadowcoord.w, in.v_shadowcoord.z/in.v_shadowcoord.w);
+    constexpr sampler shadow_sampler(coord::normalized, filter::nearest, address::clamp_to_edge, compare_func::less);
+    //vector pos = mul(input.vpos + vector(input.normal * 0.4f, 0), worldviewproj);
+    //float shadow = shadow_texture.sample_compare(shadow_sampler, in.v_shadowcoord.xy/in.v_shadowcoord.w, in.v_shadowcoord.z/in.v_shadowcoord.w);
     
     //计算漫反射
     float3 n = normalize(in.normal_camerasapce);
@@ -156,36 +158,14 @@ fragment half4 phong_fragment(OutVertex in [[stage_in]],depth2d<float> shadow_te
     float3 r = -l + 2.0 * n_dot_l * n;
     float e_dot_r = saturate(dot(e,r));
     float4 specular_color = materialSpecularColor * light_color * pow(e_dot_r,materialShine);
-    color = half4(half3(materialAmbientColor.rgb + shadow * (diffuse_color.rgb + specular_color.rgb)),1.0);
-
+    color = half4(half3(materialAmbientColor.rgb +  (diffuse_color.rgb + specular_color.rgb)),1.0);
+    //color = half4(half3(materialAmbientColor.rgb + diffuse_color.rgb + specular_color.rgb),shadow);
     //color = half4(materialAmbientColor + diffuse_color + specular_color);
     //color.a = shadow;
     return color;
 }
 
 fragment half4 phong_fragment_static(OutVertex in [[stage_in]],depth2d<float> shadow_texture [[texture(0)]]){
-    half4 color;
-    
-    constexpr sampler shadow_sampler(coord::normalized, filter::linear, address::clamp_to_zero, compare_func::less_equal);
-    
-    float shadow = shadow_texture.sample_compare(shadow_sampler, in.v_shadowcoord.xy/in.v_shadowcoord.w, in.v_shadowcoord.z/in.v_shadowcoord.w);
-    //计算漫反射
-    float3 n = normalize(in.normal_camerasapce);
-    float3 l = normalize(in.light_direction_camerasapce);
-    auto n_dot_l = saturate(dot(n,l));
-    float4 diffuse_color = light_color * n_dot_l * materialDiffuseColor;
-    
-    //计算全反射
-    
-    float3 e = normalize(in.eye_direnction_cameraspace);
-    float3 r = -l + 2.0 * n_dot_l * n;
-    float e_dot_r = saturate(dot(e,r));
-    float4 specular_color = materialSpecularColor * light_color * pow(e_dot_r,materialShine);
-    color = half4(half3(float3(0.15,0.75,0.15) + shadow * (diffuse_color.rgb + specular_color.rgb)),1.0);
-    //color = half4(float4(0.15,0.85,0.1,1.0) + diffuse_color + specular_color);
-    return color;
-}
-fragment half4 phong_fragment_static_1(OutVertex in [[stage_in]],depth2d<float> shadow_texture [[texture(0)]]){
     half4 color;
     
     constexpr sampler shadow_sampler(coord::normalized, filter::linear, address::clamp_to_zero, compare_func::less);
@@ -203,7 +183,29 @@ fragment half4 phong_fragment_static_1(OutVertex in [[stage_in]],depth2d<float> 
     float3 r = -l + 2.0 * n_dot_l * n;
     float e_dot_r = saturate(dot(e,r));
     float4 specular_color = materialSpecularColor * light_color * pow(e_dot_r,materialShine);
-    color = half4(half3(float3(0.15,0.15,0.15) + shadow * (diffuse_color.rgb + specular_color.rgb)),1.0);
+    color = half4(half3(float3(0.15,0.75,0.15) + shadow * (diffuse_color.rgb + specular_color.rgb)),1.0);
+    //color = half4((half4(0.15,0.85,0.1,1.0) + half4(diffuse_color + specular_color)).xyz,shadow);
+    return color;
+}
+fragment half4 phong_fragment_static_1(OutVertex in [[stage_in]],depth2d<float> shadow_texture [[texture(0)]]){
+    half4 color;
+    
+    constexpr sampler shadow_sampler(coord::normalized, filter::linear, address::clamp_to_zero, compare_func::less);
+    
+    //float shadow = shadow_texture.sample_compare(shadow_sampler, in.v_shadowcoord.xy/in.v_shadowcoord.w, in.v_shadowcoord.z/in.v_shadowcoord.w);
+    //计算漫反射
+    float3 n = normalize(in.normal_camerasapce);
+    float3 l = normalize(in.light_direction_camerasapce);
+    auto n_dot_l = saturate(dot(n,l));
+    float4 diffuse_color = light_color * n_dot_l * materialDiffuseColor;
+    
+    //计算全反射
+    
+    float3 e = normalize(in.eye_direnction_cameraspace);
+    float3 r = -l + 2.0 * n_dot_l * n;
+    float e_dot_r = saturate(dot(e,r));
+    float4 specular_color = materialSpecularColor * light_color * pow(e_dot_r,materialShine);
+    color = half4(half3(float3(0.15,0.15,0.15) + diffuse_color.rgb + specular_color.rgb),1.0);
     //color = half4(float4(0.15,0.85,0.1,1.0) + diffuse_color + specular_color);
     return color;
 }

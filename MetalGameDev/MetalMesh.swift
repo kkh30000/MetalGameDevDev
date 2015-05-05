@@ -23,7 +23,7 @@ class MeshAssets:NSObject {
         //var error = NSErrorPointer()
         var jsonDict = NSJSONSerialization.JSONObjectWithData(meshData!, options: NSJSONReadingOptions.AllowFragments, error: nil) as! NSDictionary
         m_vertexArray = jsonDict.objectForKey("vertex") as? [Float]
-        var vertexIndices = jsonDict.objectForKey("indices") as? [Int]
+        var vertexIndices = jsonDict.objectForKey("index") as? [Float]
         m_vertexIndices = [UInt16](count: vertexIndices!.count, repeatedValue: 0)
         for var i = 0 ; i < vertexIndices!.count ; ++i{
             m_vertexIndices![i] = UInt16(vertexIndices![i])

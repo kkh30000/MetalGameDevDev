@@ -73,7 +73,7 @@ class MTLGamePlayer: NSObject{
         m_currentUniform = 0
         
         //初始化light pespetive
-        m_lightUniform = MTLMVPUniform(model: Matrix(), view: MTLCamera(pos: [200,800,200], target: [0,0,0], up: [0,1,0]).viewMatrix(), projection: Matrix.MatrixMakeFrustum_oc(-1, right: 1, bottom: -1, top: 1, near: 100, far: 10000), device: m_scene!.m_device!, player: self)
+        m_lightUniform = MTLMVPUniform(model: Matrix(), view: MTLCamera(pos: [200,800,200], target: [0,0,0], up: [0,1,0]).viewMatrix(), projection: Matrix.MatrixMakeFrustum_oc(-1, right: 1, bottom: -1, top: 1, near: 200, far: 1000), device: m_scene!.m_device!, player: self)
         var modelView = Matrix()
         modelView.scale(Float(m_scene!.frame.size.width) / Float(m_scene!.frame.size.height), y: 1, z: 1)
         m_renderToScreenUniform = MTLMVPUniform(model: Matrix(), view: MTLCamera(pos: [0,0,0], target: [0,0,1], up: [0,1,0]).viewMatrix(), projection: Matrix.MatrixMakePerpective_fov(90, aspect: Float(m_scene!.frame.size.width)/Float(m_scene!.frame.size.width), near: 0.1, far: 1.00), device: m_scene!.m_device!, player: self)
@@ -147,14 +147,14 @@ class MTLGamePlayer: NSObject{
         for var i = 0; i < m_actors!.count ; ++i{
             if m_actors![i].m_animationController != nil{
                 paraCommandEncoders[i].setRenderPipelineState(m_shadowRenderPipelineState)
-                paraCommandEncoders[i].setCullMode(MTLCullMode.Front)
+                paraCommandEncoders[i].setCullMode(MTLCullMode.Back)
             }else{
                 paraCommandEncoders[i].setRenderPipelineState(m_shadowRenderPipelineStateStatic)
                 paraCommandEncoders[i].setCullMode(MTLCullMode.Back)
             }
             paraCommandEncoders[i].setDepthStencilState(m_shadowDepthStencilState!)
             
-            paraCommandEncoders[i].setDepthBias(0.0005, slopeScale: 1.0, clamp: 0.0005)
+            paraCommandEncoders[i].setDepthBias(0.1, slopeScale: 1.0, clamp: 0.1)
             paraCommandEncoders[i].setVertexBuffer(m_lightUniform[m_currentUniform!], offset: 0, atIndex: 1)
             if m_actors![i].m_animationController != nil{
                 paraCommandEncoders[i].setVertexBuffer(m_actors![i].m_animationController!.m_uniformBuffer[m_currentUniform!], offset: 0, atIndex: 2)
