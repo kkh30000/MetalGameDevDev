@@ -34,6 +34,7 @@ class MTLGameScene:UIView,MTLGameViewControllerDelegate{
     
     var m_cameraProjection:[Float]! = nil
     var m_lightProjection:[Float]! = nil
+    var m_textureLoader:AAPLTexture2D! = nil
     
     
     var m_camera:MTLCamera! = nil
@@ -68,11 +69,11 @@ class MTLGameScene:UIView,MTLGameViewControllerDelegate{
         //m_metalLayer!.drawsAsynchronously = true
         //m_metalLayer!.presentsWithTransaction = false
         
-        var mesh = MTLMesh(meshAsset: MeshAssets(vertexArray:please_work2, indices: humandroid_indices), scene: self,vertexShader:"vertexShader",fragmentShader:"phong_fragment",drawType:MTLPrimitiveType.Triangle,depthType:MTLPixelFormat.Depth32Float)
-        var mesh3 = MTLMesh(meshAsset: MeshAssets(vertexArray:please_work2, indices: humandroid_indices), scene: self,vertexShader:"vertexShader",fragmentShader:"phong_fragment",drawType:MTLPrimitiveType.Triangle,depthType:MTLPixelFormat.Depth32Float)
+        var mesh = MTLMesh(meshAsset: MeshAssets(filePath: "humanoid"), scene: self,vertexShader:"vertexShader",fragmentShader:"phong_fragment",drawType:MTLPrimitiveType.Triangle,depthType:MTLPixelFormat.Depth32Float)
+        var mesh3 = MTLMesh(meshAsset: MeshAssets(filePath: "humanoid"), scene: self,vertexShader:"vertexShader",fragmentShader:"phong_fragment",drawType:MTLPrimitiveType.Triangle,depthType:MTLPixelFormat.Depth32Float)
         var mesh1 = MTLMesh(meshAsset: MeshAssets(vertexArray:  plat_vertex, indices: plat_indices), scene: self,vertexShader:"vertexShader_Static",fragmentShader:"phong_fragment_static",drawType:MTLPrimitiveType.Triangle,depthType:MTLPixelFormat.Depth32Float)
         var mesh2 = MTLMesh(meshAsset: MeshAssets(vertexArray:axis_vertex, indices: axis_indices), scene: self,vertexShader:"vertexShader_Static",fragmentShader:"phong_fragment_static",drawType:MTLPrimitiveType.Line,depthType:MTLPixelFormat.Depth32Float)
-        var meshCK = MTLMesh(meshAsset: MeshAssets(filePath: "ck"), scene: self, vertexShader: "vertexShader_Static", fragmentShader: "phong_fragment_static_1", drawType:MTLPrimitiveType.Triangle, depthType: MTLPixelFormat.Depth32Float)
+        var meshCK = MTLMesh(meshAsset: MeshAssets(filePath: "ck"), scene: self, vertexShader: "vertexShader_Static", fragmentShader: "phong_fragment_static", drawType:MTLPrimitiveType.Triangle, depthType: MTLPixelFormat.Depth32Float)
         var actorCK = MTLActor(mesh: meshCK, animationController: nil)
         var actor1 = MTLActor(mesh: mesh, animationController: MTLAnimationController(animationFileName: "animation", scene: self))
         var actor4 = MTLActor(mesh: mesh3, animationController: MTLAnimationController(animationFileName: "animation1", scene: self))
@@ -83,6 +84,12 @@ class MTLGameScene:UIView,MTLGameViewControllerDelegate{
         m_player = MTLGamePlayer(scene: self)
         m_uniform = MTLMVPUniform(model: Matrix(), view: MTLCamera(pos: [400,400,400], target: [0,0,0], up: [0,1,0]).viewMatrix(), projection: Matrix.MatrixMakeFrustum_oc(-1.01, right: 1.01, bottom: -1.01, top: 1.01, near: 1.01, far: -1.01), device: m_device!, player: m_player)
         m_player!.prepareActors([actorCK,actor1,actor4,actor2])
+        /*m_textureLoader = AAPLPVRTexture(resourceName: "output1", ext:"pvr")
+        if m_textureLoader.loadIntoTextureWithDevice(m_device!) == false{
+            println("Load Texture Failed")
+        }*/
+        m_textureLoader = AAPLTexture2D(resourceName: "invoker_color", ext: "png")
+        m_textureLoader.loadIntoTextureWithDevice(m_device!)
         
     }
     func currentDrawable()->CAMetalDrawable{

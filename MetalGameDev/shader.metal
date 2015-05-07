@@ -18,6 +18,7 @@ struct uniform_buffer{
 struct InVertex{
     packed_float3 position;
     packed_float3 normal;
+    packed_float2 texCoord;
     float bone0;
     float weight0;
     float bone1;
@@ -26,6 +27,7 @@ struct InVertex{
 struct InVertexStatic{
     packed_float3 position;
     packed_float3 normal;
+    packed_float2 texCoord;
 
 };
 //常量
@@ -41,6 +43,7 @@ constant float materialShine = 500.0;
 struct OutVertex{
     float4 position [[position]];
     //float pointSize [[point_size]];
+    float2 texCoord;
     float3 normal_camerasapce;
     float3 eye_direnction_cameraspace;
     float3 light_direction_camerasapce;
@@ -97,7 +100,7 @@ vertex OutVertex vertexShader(const device InVertex* vertex_array [[buffer(0)]],
     bais[2] = float4(0,0,0.5,0);
     bais[3] = float4(0.5,0.5,0.5,1);
     
-
+    vertexOut.texCoord = vertex_array[vid].texCoord;
     vertexOut.v_shadowcoord = bais * light.p * light.v * float4(float3((vertex_array[vid]).position),1.0);
     //计算发现在camera中的位置
     float3 normal = vertex_array[vid].normal;
@@ -118,6 +121,8 @@ vertex OutVertex vertexShader_Static(const device InVertexStatic* vertex_array [
     float4x4 projection_matrix = mvp.p;
     float4x4 model_view_matrx = mvp.v * model_matrix;
     float4x4 mvp_matrix = mvp.p * model_view_matrx;
+    
+    vertexOut.texCoord = vertex_array[vid].texCoord;
     
     //计算坐标（VP中的位置）
     vertexOut.position = mvp_matrix * float4(float3((vertex_array[vid]).position),1.0);
@@ -140,11 +145,9 @@ vertex OutVertex vertexShader_Static(const device InVertexStatic* vertex_array [
     return vertexOut;
 }
 
-fragment half4 phong_fragment(OutVertex in [[stage_in]],depth2d<float> shadow_texture [[texture(0)]]){
-    half4 color;
-    constexpr sampler shadow_sampler(coord::normalized, filter::nearest, address::clamp_to_edge, compare_func::less);
-    //vector pos = mul(input.vpos + vector(input.normal * 0.4f, 0), worldviewproj);
-    //float shadow = shadow_texture.sample_compare(shadow_sampler, in.v_shadowcoord.xy/in.v_shadowcoord.w, in.v_shadowcoord.z/in.v_shadowcoord.w);
+fragment float4 phong_fragment(OutVertex in [[stage_in]],depth2d<float> shadow_texture [[texture(0)]]){
+    float4 color;
+    
     
     //计算漫反射
     float3 n = normalize(in.normal_camerasapce);
@@ -158,17 +161,21 @@ fragment half4 phong_fragment(OutVertex in [[stage_in]],depth2d<float> shadow_te
     float3 r = -l + 2.0 * n_dot_l * n;
     float e_dot_r = saturate(dot(e,r));
     float4 specular_color = materialSpecularColor * light_color * pow(e_dot_r,materialShine);
-    color = half4(half3(materialAmbientColor.rgb +  (diffuse_color.rgb + specular_color.rgb)),1.0);
+    color = float4(float3(materialAmbientColor.rgb +  (diffuse_color.rgb + specular_color.rgb)),1.0);
     //color = half4(half3(materialAmbientColor.rgb + diffuse_color.rgb + specular_color.rgb),shadow);
     //color = half4(materialAmbientColor + diffuse_color + specular_color);
     //color.a = shadow;
     return color;
 }
 
-fragment half4 phong_fragment_static(OutVertex in [[stage_in]],depth2d<float> shadow_texture [[texture(0)]]){
-    half4 color;
+fragment float4 phong_fragment_static(OutVertex in [[stage_in]],depth2d<float> shadow_texture [[texture(0)]],texture2d<float> modelTexture [[texture(1)]]){
+    float4 color;
     
     constexpr sampler shadow_sampler(coord::normalized, filter::linear, address::clamp_to_zero, compare_func::less);
+    constexpr sampler texture_sampler;
+    float4 modelColor = modelTexture.sample(texture_sampler,in.texCoord);
+    
+    
     
     float shadow = shadow_texture.sample_compare(shadow_sampler, in.v_shadowcoord.xy/in.v_shadowcoord.w, in.v_shadowcoord.z/in.v_shadowcoord.w);
     //计算漫反射
@@ -183,12 +190,12 @@ fragment half4 phong_fragment_static(OutVertex in [[stage_in]],depth2d<float> sh
     float3 r = -l + 2.0 * n_dot_l * n;
     float e_dot_r = saturate(dot(e,r));
     float4 specular_color = materialSpecularColor * light_color * pow(e_dot_r,materialShine);
-    color = half4(half3(float3(0.15,0.75,0.15) + shadow * (diffuse_color.rgb + specular_color.rgb)),1.0);
+    color = float4(float3(modelColor.rgb + shadow * (diffuse_color.rgb + specular_color.rgb)),1.0);
     //color = half4((half4(0.15,0.85,0.1,1.0) + half4(diffuse_color + specular_color)).xyz,shadow);
     return color;
 }
-fragment half4 phong_fragment_static_1(OutVertex in [[stage_in]],depth2d<float> shadow_texture [[texture(0)]]){
-    half4 color;
+/*fragment float4 phong_fragment_static_1(OutVertex in [[stage_in]],depth2d<float> shadow_texture [[texture(0)]]){
+    float4 color;
     
     constexpr sampler shadow_sampler(coord::normalized, filter::linear, address::clamp_to_zero, compare_func::less);
     
@@ -208,7 +215,7 @@ fragment half4 phong_fragment_static_1(OutVertex in [[stage_in]],depth2d<float> 
     color = half4(half3(float3(0.15,0.15,0.15) + diffuse_color.rgb + specular_color.rgb),1.0);
     //color = half4(float4(0.15,0.85,0.1,1.0) + diffuse_color + specular_color);
     return color;
-}
+}*/
 
 
 struct FinalVertexIn{

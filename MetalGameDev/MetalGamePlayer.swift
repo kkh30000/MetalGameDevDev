@@ -235,6 +235,7 @@ class MTLGamePlayer: NSObject{
             paraCommandEncoders[i].setVertexBuffer(m_lightUniform[m_currentUniform!], offset: 0, atIndex: 3)
             paraCommandEncoders[i].setVertexBuffer(m_actors![i].m_mesh.m_vertexBuffer, offset: 0, atIndex: 0)
             paraCommandEncoders[i].setFragmentTexture(m_shadowMap!, atIndex: 0)
+            paraCommandEncoders[i].setFragmentTexture(m_scene!.m_textureLoader.texture, atIndex: 1)
             paraCommandEncoders[i].setRenderPipelineState(m_actors![i].m_mesh.m_renderPipeLineState!)
             if m_actors![i].m_mesh.m_meshAssets.m_vertexIndices == nil{
                 paraCommandEncoders[i].drawPrimitives(m_actors![i].m_mesh.m_meshType!, vertexStart: 0, vertexCount: 3, instanceCount: 1)
