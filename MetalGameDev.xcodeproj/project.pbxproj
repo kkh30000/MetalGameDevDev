@@ -23,6 +23,8 @@
 		572E80F11AE904310093869D /* Asset1.swift in Sources */ = {isa = PBXBuildFile; fileRef = 572E80F01AE904310093869D /* Asset1.swift */; };
 		5735C9E41AE62BDC00703391 /* shader.metal in Sources */ = {isa = PBXBuildFile; fileRef = 5735C9E31AE62BDC00703391 /* shader.metal */; };
 		574643FE1AFA07F300214BBB /* invoker_color.png in Resources */ = {isa = PBXBuildFile; fileRef = 574643FD1AFA07F300214BBB /* invoker_color.png */; };
+		574644001AFB47D400214BBB /* MTLLight.swift in Sources */ = {isa = PBXBuildFile; fileRef = 574643FF1AFB47D400214BBB /* MTLLight.swift */; };
+		574644021AFB4FDF00214BBB /* MTLReadOnlyUniform.swift in Sources */ = {isa = PBXBuildFile; fileRef = 574644011AFB4FDF00214BBB /* MTLReadOnlyUniform.swift */; };
 		574FC1741AEFD9ED00D0CD9C /* ck.json in Resources */ = {isa = PBXBuildFile; fileRef = 574FC1731AEFD9ED00D0CD9C /* ck.json */; };
 		57597D971AF8ECAE00E33FBF /* AAPLPVRTexture.m in Sources */ = {isa = PBXBuildFile; fileRef = 57597D941AF8ECAE00E33FBF /* AAPLPVRTexture.m */; };
 		57597D981AF8ECAE00E33FBF /* AAPLTexture.m in Sources */ = {isa = PBXBuildFile; fileRef = 57597D961AF8ECAE00E33FBF /* AAPLTexture.m */; };
@@ -33,6 +35,7 @@
 		577EE6F51AE617D200BE78F4 /* MTLCamera.swift in Sources */ = {isa = PBXBuildFile; fileRef = 577EE6F41AE617D200BE78F4 /* MTLCamera.swift */; };
 		5797B5251AE6B65A0051A2B4 /* animation1.json in Resources */ = {isa = PBXBuildFile; fileRef = 5797B5241AE6B65A0051A2B4 /* animation1.json */; };
 		57ABF1A41AED3A6D0032AE6D /* MTLTextureLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57ABF1A31AED3A6D0032AE6D /* MTLTextureLoader.swift */; };
+		57B055021AFF4CC600ACF455 /* invoker.json in Resources */ = {isa = PBXBuildFile; fileRef = 57B055011AFF4CC600ACF455 /* invoker.json */; };
 		57C1E2AD1AE6A4E300BCD75A /* animation.json in Resources */ = {isa = PBXBuildFile; fileRef = 57C1E2AC1AE6A4E300BCD75A /* animation.json */; };
 		57F6B9E81AF8BEFF00719215 /* MTLPVRTexture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57F6B9E71AF8BEFF00719215 /* MTLPVRTexture.swift */; };
 /* End PBXBuildFile section */
@@ -68,6 +71,8 @@
 		572E80F01AE904310093869D /* Asset1.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Asset1.swift; sourceTree = "<group>"; };
 		5735C9E31AE62BDC00703391 /* shader.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = shader.metal; sourceTree = "<group>"; };
 		574643FD1AFA07F300214BBB /* invoker_color.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = invoker_color.png; sourceTree = "<group>"; };
+		574643FF1AFB47D400214BBB /* MTLLight.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MTLLight.swift; sourceTree = "<group>"; };
+		574644011AFB4FDF00214BBB /* MTLReadOnlyUniform.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MTLReadOnlyUniform.swift; sourceTree = "<group>"; };
 		574FC1731AEFD9ED00D0CD9C /* ck.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = ck.json; sourceTree = "<group>"; };
 		57597D931AF8ECAE00E33FBF /* AAPLPVRTexture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AAPLPVRTexture.h; sourceTree = "<group>"; };
 		57597D941AF8ECAE00E33FBF /* AAPLPVRTexture.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AAPLPVRTexture.m; sourceTree = "<group>"; };
@@ -81,6 +86,7 @@
 		577EE6F61AE618A400BE78F4 /* MetalGameDev-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MetalGameDev-Bridging-Header.h"; sourceTree = "<group>"; };
 		5797B5241AE6B65A0051A2B4 /* animation1.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = animation1.json; sourceTree = "<group>"; };
 		57ABF1A31AED3A6D0032AE6D /* MTLTextureLoader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MTLTextureLoader.swift; sourceTree = "<group>"; };
+		57B055011AFF4CC600ACF455 /* invoker.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = invoker.json; sourceTree = "<group>"; };
 		57C1E2AC1AE6A4E300BCD75A /* animation.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = animation.json; sourceTree = "<group>"; };
 		57F6B9E71AF8BEFF00719215 /* MTLPVRTexture.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MTLPVRTexture.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -126,6 +132,7 @@
 			children = (
 				57270BB81AE615A700AAE3F2 /* AppDelegate.swift */,
 				57270BD81AE615D200AAE3F2 /* MetalGameViewController.swift */,
+				57B055011AFF4CC600ACF455 /* invoker.json */,
 				57270BDA1AE615FB00AAE3F2 /* MetalGameScene.swift */,
 				57270BDC1AE6162D00AAE3F2 /* MetalGamePlayer.swift */,
 				57270BDE1AE6164600AAE3F2 /* MetalActor.swift */,
@@ -133,10 +140,12 @@
 				577EE6F41AE617D200BE78F4 /* MTLCamera.swift */,
 				57270BE21AE6166E00AAE3F2 /* MetalAnimationController.swift */,
 				57270BE61AE6167F00AAE3F2 /* MTLUniform.swift */,
+				574644011AFB4FDF00214BBB /* MTLReadOnlyUniform.swift */,
 				57597DA11AF9E6C800E33FBF /* Image.png */,
 				577837981AF273150071B35F /* MTLmvpUniformBuffer.swift */,
 				57ABF1A31AED3A6D0032AE6D /* MTLTextureLoader.swift */,
 				57F6B9E71AF8BEFF00719215 /* MTLPVRTexture.swift */,
+				574643FF1AFB47D400214BBB /* MTLLight.swift */,
 				57597D9F1AF9E21300E33FBF /* output1.pvr */,
 				574643FD1AFA07F300214BBB /* invoker_color.png */,
 				57270BE41AE6167500AAE3F2 /* Math.swift */,
@@ -265,6 +274,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				57B055021AFF4CC600ACF455 /* invoker.json in Resources */,
 				574643FE1AFA07F300214BBB /* invoker_color.png in Resources */,
 				57270BBE1AE615A700AAE3F2 /* Main.storyboard in Resources */,
 				5797B5251AE6B65A0051A2B4 /* animation1.json in Resources */,
@@ -294,6 +304,8 @@
 			files = (
 				57270BD91AE615D200AAE3F2 /* MetalGameViewController.swift in Sources */,
 				57597D971AF8ECAE00E33FBF /* AAPLPVRTexture.m in Sources */,
+				574644021AFB4FDF00214BBB /* MTLReadOnlyUniform.swift in Sources */,
+				574644001AFB47D400214BBB /* MTLLight.swift in Sources */,
 				57270BB91AE615A700AAE3F2 /* AppDelegate.swift in Sources */,
 				57270BE31AE6166E00AAE3F2 /* MetalAnimationController.swift in Sources */,
 				57F6B9E81AF8BEFF00719215 /* MTLPVRTexture.swift in Sources */,
@@ -447,6 +459,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "MetalGameDev/MetalGameDev-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Ounchecked";
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
@@ -463,6 +476,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "MetalGameDev/MetalGameDev-Bridging-Header.h";
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};

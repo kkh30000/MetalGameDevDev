@@ -25,6 +25,100 @@ class Matrix:NSObject {
         m_raw[3][0] = matrxBuffer[12];m_raw[3][1] = matrxBuffer[13];m_raw[3][2] = matrxBuffer[14];m_raw[3][3] = matrxBuffer[15];
     }
     
+    
+    
+    
+    subscript(index:(Int,Int))->Float{
+        get{
+            return m_raw[index.1][index.0]
+        }
+        set{
+            m_raw[index.1][index.0] = newValue
+        }
+    }
+    
+    
+    func inverse()->Matrix?{
+        var iis:[Int] = [Int](count: 4, repeatedValue: 0)
+        var jjs:[Int] = [Int](count: 4, repeatedValue: 0)
+        
+        var fDet:Float = 1.0
+        var f:Int = 1
+        
+        for var k = 0 ; k < 4 ; ++k{
+            var fMax:Float = 0.0
+            for  var i = k ; i < 4; ++i{
+                for var j = k ; j < 4; ++j{
+                    let temp:Float = abs(self[(i,j)])
+                    if temp > fMax{
+                        fMax = temp
+                        iis[k] = i
+                        jjs[k] = j
+                    }
+                }
+            }
+            if abs(fMax) < 0.0001{
+                return self
+            }
+            if iis[k] != k {
+                f = -f
+                swap(&self[(k,0)], &self[(iis[k],0)])
+                swap(&self[(k,1)], &self[(iis[k],1)])
+                swap(&self[(k,2)], &self[(iis[k],2)])
+                swap(&self[(k,3)], &self[(iis[k],3)])
+                
+                
+            }
+            if jjs[k] != k {
+                f = -f
+                swap(&self[(0,k)], &self[(0,jjs[k])])
+                swap(&self[(1,k)], &self[(1,jjs[k])])
+                swap(&self[(2,k)], &self[(2,jjs[k])])
+                swap(&self[(3,k)], &self[(3,jjs[k])])
+            }
+            fDet *= self[(k,k)]
+            
+            self[(k,k)] = 1.0/self[(k,k)]
+            for var j = 0 ; j < 4 ; ++j{
+                if j != k{
+                    self[(k,j)] *= self[(k,k)]
+                }
+            }
+            for var i = 0 ; i < 4 ; ++i{
+                if i != k {
+                    for var j = 0 ; j < 4 ; ++j{
+                        if j != k{
+                            self[(i,j)] -= self[(i,k)] * self[(k,j)]
+                        }
+                    }
+                }
+            }
+            for var i = 0 ; i < 4 ; ++i{
+                if i != k{
+                    self[(i,k)] *= -self[(k,k)]
+                }
+            }
+        }
+        for var k = 3 ; k >= 0; --k{
+            if jjs[k] != k{
+                swap(&self[(k,0)], &self[(jjs[k],0)])
+                swap(&self[(k,1)], &self[(jjs[k],1)])
+                swap(&self[(k,2)], &self[(jjs[k],2)])
+                swap(&self[(k,3)], &self[(jjs[k],3)])
+                
+            }
+            if iis[k] != k{
+                swap(&self[(0,k)], &self[(0,iis[k])])
+                swap(&self[(1,k)], &self[(1,iis[k])])
+                swap(&self[(2,k)], &self[(2,iis[k])])
+                swap(&self[(3,k)], &self[(3,iis[k])])
+                
+            }
+        }
+        return self
+        
+    }
+    
     class func reverse(matrix:Matrix){
         var temp = Float(0.0)
         
@@ -309,6 +403,17 @@ func *(left : Float,right:[Float])->[Float]{
         result[i] *= left
     }
     return result
+}
+
+func *(left:Matrix,right:[Float])->[Float]{
+    //left.inverse()
+    Matrix.reverse(left)
+    let x = left.m_raw[0] * right
+    let y = left.m_raw[1] * right
+    let z = left.m_raw[2] * right
+    let w = left.m_raw[3] * right
+    return [x,y,z,w]
+    
 }
 
 

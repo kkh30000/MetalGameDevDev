@@ -36,8 +36,11 @@ class MTLGameScene:UIView,MTLGameViewControllerDelegate{
     var m_lightProjection:[Float]! = nil
     var m_textureLoader:AAPLTexture2D! = nil
     
+    var m_viewMatrix:Matrix! = nil
+    var m_projectionMatrix:Matrix! = nil
     
     var m_camera:MTLCamera! = nil
+    var m_temp:Matrix! = nil
     
     
     
@@ -64,6 +67,7 @@ class MTLGameScene:UIView,MTLGameViewControllerDelegate{
         m_device = MTLCreateSystemDefaultDevice()
         m_commandQueue = m_device!.newCommandQueue()
         m_metalLayer = self.layer as? CAMetalLayer
+       
         m_metalLayer!.pixelFormat = MTLPixelFormat.BGRA8Unorm
         m_metalLayer!.device = m_device
         //m_metalLayer!.drawsAsynchronously = true
@@ -71,7 +75,7 @@ class MTLGameScene:UIView,MTLGameViewControllerDelegate{
         
         var mesh = MTLMesh(meshAsset: MeshAssets(filePath: "humanoid"), scene: self,vertexShader:"vertexShader",fragmentShader:"phong_fragment",drawType:MTLPrimitiveType.Triangle,depthType:MTLPixelFormat.Depth32Float)
         var mesh3 = MTLMesh(meshAsset: MeshAssets(filePath: "humanoid"), scene: self,vertexShader:"vertexShader",fragmentShader:"phong_fragment",drawType:MTLPrimitiveType.Triangle,depthType:MTLPixelFormat.Depth32Float)
-        var mesh1 = MTLMesh(meshAsset: MeshAssets(vertexArray:  plat_vertex, indices: plat_indices), scene: self,vertexShader:"vertexShader_Static",fragmentShader:"phong_fragment_static",drawType:MTLPrimitiveType.Triangle,depthType:MTLPixelFormat.Depth32Float)
+        var mesh1 = MTLMesh(meshAsset: MeshAssets(vertexArray:  plat_vertex, indices: plat_indices), scene: self,vertexShader:"vertexShader_Static",fragmentShader:"phong_fragment_static_1",drawType:MTLPrimitiveType.Triangle,depthType:MTLPixelFormat.Depth32Float)
         var mesh2 = MTLMesh(meshAsset: MeshAssets(vertexArray:axis_vertex, indices: axis_indices), scene: self,vertexShader:"vertexShader_Static",fragmentShader:"phong_fragment_static",drawType:MTLPrimitiveType.Line,depthType:MTLPixelFormat.Depth32Float)
         var meshCK = MTLMesh(meshAsset: MeshAssets(filePath: "ck"), scene: self, vertexShader: "vertexShader_Static", fragmentShader: "phong_fragment_static", drawType:MTLPrimitiveType.Triangle, depthType: MTLPixelFormat.Depth32Float)
         var actorCK = MTLActor(mesh: meshCK, animationController: nil)
@@ -88,8 +92,11 @@ class MTLGameScene:UIView,MTLGameViewControllerDelegate{
         if m_textureLoader.loadIntoTextureWithDevice(m_device!) == false{
             println("Load Texture Failed")
         }*/
+        m_viewMatrix = MTLCamera(pos: [400,400,400], target: [0,0,0], up: [0,1,0]).viewMatrix()
+        m_projectionMatrix = Matrix.MatrixMakeFrustum_oc(-1.01, right: 1.01, bottom: -1.01, top: 1.01, near: 1.01, far: -1.01)
         m_textureLoader = AAPLTexture2D(resourceName: "invoker_color", ext: "png")
         m_textureLoader.loadIntoTextureWithDevice(m_device!)
+      
         
     }
     func currentDrawable()->CAMetalDrawable{
@@ -112,140 +119,10 @@ class MTLGameScene:UIView,MTLGameViewControllerDelegate{
         colorAttachment?.texture = texture
         
         // make sure to clear every frame for best performance
-        colorAttachment?.loadAction = MTLLoadAction.Clear
+        colorAttachment?.loadAction = MTLLoadAction.Load
         colorAttachment?.clearColor = MTLClearColorMake(0.1, 0.65, 0.65, 1.0)
         
-        // if sample count is greater than 1, render into using MSAA,
-        // then resolve into our color texture
-        /*if (m_sampleCount > 1)
-        {
-            var doUpdate:Bool = false
-            if (m_msaaTex == nil)
-            {
-                doUpdate = true
-            }
-            else
-            {
-                doUpdate = (m_msaaTex!.width != texture.width ||
-                    m_msaaTex!.height != texture.height ||
-                    m_msaaTex!.sampleCount != m_sampleCount)
-            }
-            if (doUpdate)
-            {
-                let desc = MTLTextureDescriptor.texture2DDescriptorWithPixelFormat(
-                    MTLPixelFormat.BGRA8Unorm,
-                    width: texture.width,
-                    height: texture.height,
-                    mipmapped: false)
-                
-                desc.textureType = MTLTextureType.Type2DMultisample
-                
-                // sample count was specified to the view by the renderer.
-                // this must match the sample count given to any pipeline
-                // state using this render pass descriptor
-                desc.sampleCount = m_sampleCount!
-                
-                m_msaaTex = m_device!.newTextureWithDescriptor(desc)
-            }
-            
-            // When multisampling, perform rendering to _msaaTex, then resolve
-            // to 'texture' at the end of the scene
-            colorAttachment?.texture = m_msaaTex
-            colorAttachment?.resolveTexture = texture
-            
-            // set store action to resolve in this case
-            colorAttachment?.storeAction = MTLStoreAction.MultisampleResolve
-        }
-        else
-        {
-            // store only attachments that will be presented to the screen, as in this case
-            colorAttachment?.storeAction = MTLStoreAction.Store
-        }   // color0
         
-        // Now create the depth and stencil attachments
-        if (m_depthPixelFormat != MTLPixelFormat.Invalid)
-        {
-            var doUpdate:Bool = false
-            if (m_depthTex == nil)
-            {
-                doUpdate = true
-            }
-            else
-            {
-                doUpdate = (m_depthTex!.width != texture.width ||
-                    m_depthTex!.height != texture.height ||
-                    m_depthTex!.sampleCount != m_sampleCount)
-            }
-            
-            if (doUpdate)
-            {
-                // If we need a depth texture and don't have one,
-                // or if the depth texture we have is the wrong size
-                // Then allocate one of the proper size
-                let desc = MTLTextureDescriptor.texture2DDescriptorWithPixelFormat(
-                    m_depthPixelFormat!,
-                    width: texture.width,
-                    height: texture.height,
-                    mipmapped: false)
-                
-                desc.textureType = (m_sampleCount > 1) ?
-                    MTLTextureType.Type2DMultisample : MTLTextureType.Type2D
-                
-                desc.sampleCount = m_sampleCount!
-                
-                m_depthTex = m_device!.newTextureWithDescriptor(desc)
-                
-                let depthAttachment:MTLRenderPassDepthAttachmentDescriptor
-                = m_renderPassDesc!.depthAttachment
-                depthAttachment.texture = m_depthTex
-                depthAttachment.loadAction = MTLLoadAction.DontCare
-                depthAttachment.storeAction = MTLStoreAction.DontCare
-                depthAttachment.clearDepth = 1.0
-            }
-        } // depth
-        
-        if (m_stencilPixelFormat != MTLPixelFormat.Invalid)
-        {
-            var doUpdate:Bool = false
-            if (m_stencilTex == nil)
-            {
-                doUpdate = true
-            }
-            else
-            {
-                doUpdate = (m_stencilTex!.width != texture.width ||
-                    m_stencilTex!.height != texture.height ||
-                    m_stencilTex!.sampleCount != m_sampleCount)
-            }
-            
-            if (m_stencilTex  == nil || doUpdate)
-            {
-                //  If we need a stencil texture and don't have one,
-                //  or if the depth texture we have is the wrong size
-                //  Then allocate one of the proper size
-                let desc = MTLTextureDescriptor.texture2DDescriptorWithPixelFormat(
-                    m_stencilPixelFormat!,
-                    width: texture.width,
-                    height: texture.height,
-                    mipmapped: false)
-                
-                desc.textureType = (m_sampleCount > 1) ?
-                    MTLTextureType.Type2DMultisample : MTLTextureType.Type2D
-                
-                desc.sampleCount = m_sampleCount!
-                
-                m_stencilTex = m_device!.newTextureWithDescriptor(desc)
-                
-                let stencilAttachment:MTLRenderPassStencilAttachmentDescriptor
-                = m_renderPassDesc!.stencilAttachment
-                
-                stencilAttachment.texture = m_stencilTex
-                stencilAttachment.loadAction = MTLLoadAction.Clear
-                stencilAttachment.storeAction = MTLStoreAction.DontCare
-                stencilAttachment.clearStencil = 0
-            }
-        }
-        //stencil*/
         return m_renderPassDesc!
     }
     
@@ -274,6 +151,7 @@ class MTLGameScene:UIView,MTLGameViewControllerDelegate{
     }
     
     func updatePerFrame(viewcontroller: MTLGameViewController) {
+        //m_player.m_lights.m_raw[0...3] = [Float(sin(viewcontroller.m_gameTime*2)),Float(sin(viewcontroller.m_gameTime*1.4)),Float(sin(viewcontroller.m_gameTime*1.2)),1.0]
         m_modelMatrix.rotate(0.5, r: [0,1,0])
         m_uniform.setModelMatrix(m_modelMatrix.raw())
         m_uniform.updateDataToUniform(m_uniform.m_mvpMatrix, toUniform: m_uniform[m_player!.m_currentUniform!])
@@ -282,13 +160,32 @@ class MTLGameScene:UIView,MTLGameViewControllerDelegate{
         
     }
     
-    func rotate(viewController: MTLGameViewController, rotateX: Float, rotateY: Float) {
-        m_modelMatrix.rotate(rotateX/100, r: [0,0,1])
+    func pan(viewController: MTLGameViewController, rotateX: Float, rotateY: Float) {
+        /*m_modelMatrix.rotate(rotateX/100, r: [0,0,1])
         println("X:\(rotateX)")
-        println("Y:\(rotateY)")
+        println("Y:\(rotateY)")*/
+        //println("Paning ....:\n\(viewController.m_currentPosition.x),\(viewController.m_currentPosition.y)")
+        let pos :[Float] = [2 * Float(viewController.m_currentPosition.x/self.frame.size.width) - 1.0,0.0,1 - Float(2 * viewController.m_currentPosition.y/self.frame.size.height),1.0]
         
-        //m_player.m_aaPerspective[0...15] = m_modelMatrix.raw()[0...15]
-        //m_player.m_renderToScreenUniform.updateDataToUniform(m_player.m_aaPerspective, toUniform: m_player.m_renderToScreenUniform[m_player!.m_currentUniform!])
+        
+        let posInWorld = m_viewMatrix.inverse()! * m_projectionMatrix.inverse()! * pos
+        //println("\(pos[0]),\(pos[1]),\(pos[2])")
+        println("Pos: \(posInWorld[0]/posInWorld[3]),\(posInWorld[1]/posInWorld[3]),\(posInWorld[2]/posInWorld[3])")
+        
+        
+        
+        
+    }
+    
+    func tap(viewController: MTLGameViewController) {
+        let pos :[Float] = [2 * Float(viewController.m_currentPosition.x/self.frame.size.width * UIScreen.mainScreen().scale) - 1.0,0.0,1 - Float(2 * viewController.m_currentPosition.y/self.frame.size.height * UIScreen.mainScreen().scale),1.0]
+        
+        let pos1 : [Float] = [Float(viewController.m_currentPosition.x),0.0,Float(viewController.m_currentPosition.y),1.0]
+        
+        
+        let posInWorld = m_viewMatrix.inverse()! * m_projectionMatrix.inverse()! * pos1
+        println("\(pos1[0]),\(pos1[1]),\(pos1[2])")
+        println("Pos: \(posInWorld[0]/posInWorld[3]),\(posInWorld[1]/posInWorld[3]),\(posInWorld[2]/posInWorld[3])")
     }
     
     func pause(viewController: MTLGameViewController, willPause: Bool) {

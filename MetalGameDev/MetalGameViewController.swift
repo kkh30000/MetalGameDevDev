@@ -15,9 +15,10 @@ import QuartzCore
 
 
 protocol MTLGameViewControllerDelegate{
-    func rotate(viewController:MTLGameViewController,rotateX:Float,rotateY:Float)
+    func pan(viewController:MTLGameViewController,rotateX:Float,rotateY:Float)
     func pause(viewController:MTLGameViewController,willPause:Bool)
     func updatePerFrame(viewcontroller:MTLGameViewController)
+    func tap(viewController:MTLGameViewController)
 }
 
 class MTLGameViewController: UIViewController {
@@ -29,7 +30,7 @@ class MTLGameViewController: UIViewController {
     var m_isGamePaused:Bool = false
     var m_delegate:MTLGameViewControllerDelegate! = nil
     var m_metalGameScene : MTLGameScene! = nil
-    
+    var m_currentPosition : CGPoint! = nil
     
     //手势
     var lastPanLocation:CGPoint! = nil
@@ -54,18 +55,17 @@ class MTLGameViewController: UIViewController {
     override func viewDidLoad() {
         // println("humandroid count:\(humandroid_vertices.count / 3)")
         super.viewDidLoad()
-        m_metalGameScene = MTLGameScene(frame: self.view.frame)
-        m_metalGameScene.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: "pan:"))
-        self.view = m_metalGameScene
-        
-        self.m_delegate = m_metalGameScene
+        //m_metalGameScene = MTLGameScene(frame: self.view.frame)
+        //m_metalGameScene.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: "pan:"))
+        //m_metalGameScene.addGestureRecognizer(UITapGestureRecognizer(target: self, action: "tap:"))
+        //self.view = m_metalGameScene
+        self.m_delegate = self.view as! MTLGameScene
         
     }
     
     
-    
     func pan(panGesture:UIPanGestureRecognizer){
-        if panGesture.state == UIGestureRecognizerState.Changed{
+        /*if panGesture.state == UIGestureRecognizerState.Changed{
             let currentPanPos = panGesture.locationInView(self.view)
             let deltaX = Float((currentPanPos.x - lastPanLocation.x)) / Float((self.view.bounds.size.width)) * panSensitity
             let deltaY = Float((currentPanPos.y - lastPanLocation.y)) / Float((self.view.bounds.size.height)) * panSensitity
@@ -73,7 +73,17 @@ class MTLGameViewController: UIViewController {
             //self.m_delegate.rotate(self, rotateX: deltaX, rotateY: deltaY)
         }else if panGesture.state == UIGestureRecognizerState.Began{
             self.lastPanLocation = panGesture.locationInView(self.view)
-        }
+        }*/
+        //m_currentPosition = panGesture.locationInView(self.view)
+        //self.m_delegate.pan(self, rotateX: 0, rotateY: 0)
+        
+    }
+    
+    func tap(tapGesture:UITapGestureRecognizer){
+       
+            m_currentPosition = tapGesture.locationInView(self.m_metalGameScene)
+    
+        self.m_delegate.tap(self)
     }
     
     
