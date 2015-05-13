@@ -36,13 +36,15 @@ class MTLGameScene:UIView,MTLGameViewControllerDelegate{
     var m_lightProjection:[Float]! = nil
     var m_textureLoader:AAPLTexture2D! = nil
     
-    var m_viewMatrix:Matrix! = nil
-    var m_projectionMatrix:Matrix! = nil
+    var m_viewMatrix:Matrix! = Matrix()
+    var m_projectionMatrix:Matrix! = Matrix()
     
     var m_camera:MTLCamera! = nil
     var m_temp:Matrix! = nil
     
-    
+    var m_viewWidth :Float! = nil
+    var m_viewHeight:Float! = nil
+
     
     override class func layerClass()->AnyClass{
         return CAMetalLayer.self
@@ -64,15 +66,23 @@ class MTLGameScene:UIView,MTLGameViewControllerDelegate{
         self.opaque = true
         self.backgroundColor = nil
         
+        
+        var panGesture = UIPanGestureRecognizer(target: self, action: "pan:")
+        panGesture.maximumNumberOfTouches = 1
+        self.addGestureRecognizer(panGesture)
+        
+        m_viewWidth = Float(self.frame.width)
+        m_viewHeight = Float(self.frame.height) * 0.9
+        //println(self.frame.width)
+        //println(self.frame.height)
+        
         m_device = MTLCreateSystemDefaultDevice()
         m_commandQueue = m_device!.newCommandQueue()
         m_metalLayer = self.layer as? CAMetalLayer
        
         m_metalLayer!.pixelFormat = MTLPixelFormat.BGRA8Unorm
         m_metalLayer!.device = m_device
-        //m_metalLayer!.drawsAsynchronously = true
-        //m_metalLayer!.presentsWithTransaction = false
-        
+
         var mesh = MTLMesh(meshAsset: MeshAssets(filePath: "humanoid"), scene: self,vertexShader:"vertexShader",fragmentShader:"phong_fragment",drawType:MTLPrimitiveType.Triangle,depthType:MTLPixelFormat.Depth32Float)
         var mesh3 = MTLMesh(meshAsset: MeshAssets(filePath: "humanoid"), scene: self,vertexShader:"vertexShader",fragmentShader:"phong_fragment",drawType:MTLPrimitiveType.Triangle,depthType:MTLPixelFormat.Depth32Float)
         var mesh1 = MTLMesh(meshAsset: MeshAssets(vertexArray:  plat_vertex, indices: plat_indices), scene: self,vertexShader:"vertexShader_Static",fragmentShader:"phong_fragment_static_1",drawType:MTLPrimitiveType.Triangle,depthType:MTLPixelFormat.Depth32Float)
@@ -86,14 +96,17 @@ class MTLGameScene:UIView,MTLGameViewControllerDelegate{
         //var actor1 = MTLActor(mesh: mesh1, animationController: nil)
         m_modelMatrix = Matrix()
         m_player = MTLGamePlayer(scene: self)
-        m_uniform = MTLMVPUniform(model: Matrix(), view: MTLCamera(pos: [400,400,400], target: [0,0,0], up: [0,1,0]).viewMatrix(), projection: Matrix.MatrixMakeFrustum_oc(-1.01, right: 1.01, bottom: -1.01, top: 1.01, near: 1.01, far: -1.01), device: m_device!, player: m_player)
-        m_player!.prepareActors([actorCK,actor1,actor4,actor2])
-        /*m_textureLoader = AAPLPVRTexture(resourceName: "output1", ext:"pvr")
-        if m_textureLoader.loadIntoTextureWithDevice(m_device!) == false{
-            println("Load Texture Failed")
-        }*/
-        m_viewMatrix = MTLCamera(pos: [400,400,400], target: [0,0,0], up: [0,1,0]).viewMatrix()
-        m_projectionMatrix = Matrix.MatrixMakeFrustum_oc(-1.01, right: 1.01, bottom: -1.01, top: 1.01, near: 1.01, far: -1.01)
+        m_uniform = MTLMVPUniform(model: Matrix(), view: MTLCamera(pos: [400,400,400], target: [0,0,0], up: [0,1,0]).viewMatrix(), projection: Matrix.MatrixMakeFrustum_oc(-1.01, right: 1.01, bottom: -1.01, top: 1.01, near: 1.01, far: 1000.01), device: m_device!, player: m_player)
+        m_player!.prepareActors([actorCK,actor1,actor4,actor2,actor3])
+        //var sucess : UnsafeMutablePointer<Bool> = UnsafeMutablePointer()
+        m_viewMatrix = Matrix.MatrixMakeLookAt([400,400,400], center: [0,0,0], up: [0,1,0])
+        m_viewMatrix.inverse()
+        //m_viewMatrix.GLKToSwfit(GLKMatrix4MakeLookAt(400, 400, 400, 0, 0, 0, 0, 1, 0))
+        
+        m_projectionMatrix = Matrix.MatrixMakeFrustum_oc(-1, right: 1, bottom: -1, top: 1, near: 1, far: 1000)
+        m_projectionMatrix.inverse()
+        
+        //println(m_projectionMatrix.raw())
         m_textureLoader = AAPLTexture2D(resourceName: "invoker_color", ext: "png")
         m_textureLoader.loadIntoTextureWithDevice(m_device!)
       
@@ -152,40 +165,48 @@ class MTLGameScene:UIView,MTLGameViewControllerDelegate{
     
     func updatePerFrame(viewcontroller: MTLGameViewController) {
         //m_player.m_lights.m_raw[0...3] = [Float(sin(viewcontroller.m_gameTime*2)),Float(sin(viewcontroller.m_gameTime*1.4)),Float(sin(viewcontroller.m_gameTime*1.2)),1.0]
-        m_modelMatrix.rotate(0.5, r: [0,1,0])
-        m_uniform.setModelMatrix(m_modelMatrix.raw())
-        m_uniform.updateDataToUniform(m_uniform.m_mvpMatrix, toUniform: m_uniform[m_player!.m_currentUniform!])
+        //m_modelMatrix.rotate(0.5, r: [0,1,0])
+        //m_uniform.setModelMatrix(m_modelMatrix.raw())
+        //m_uniform.updateDataToUniform(m_uniform.m_mvpMatrix, toUniform: m_uniform[m_player!.m_currentUniform!])
         m_player.m_actors![1].m_animationController!.play(viewcontroller.m_gameTime, currentBuffer: m_player.m_currentUniform!)
         m_player.m_actors![2].m_animationController!.play(viewcontroller.m_gameTime * 0.8, currentBuffer: m_player.m_currentUniform!)
         
     }
     
-    func pan(viewController: MTLGameViewController, rotateX: Float, rotateY: Float) {
-        /*m_modelMatrix.rotate(rotateX/100, r: [0,0,1])
-        println("X:\(rotateX)")
-        println("Y:\(rotateY)")*/
-        //println("Paning ....:\n\(viewController.m_currentPosition.x),\(viewController.m_currentPosition.y)")
-        let pos :[Float] = [2 * Float(viewController.m_currentPosition.x/self.frame.size.width) - 1.0,0.0,1 - Float(2 * viewController.m_currentPosition.y/self.frame.size.height),1.0]
+    
+    func normalizeTouchPoint(x:CGFloat,y:CGFloat)->(Float,Float){
+        var x1:Float = Float(x) / m_viewHeight
+        var y1:Float = Float(y) / m_viewWidth
         
-        
-        let posInWorld = m_viewMatrix.inverse()! * m_projectionMatrix.inverse()! * pos
-        //println("\(pos[0]),\(pos[1]),\(pos[2])")
-        println("Pos: \(posInWorld[0]/posInWorld[3]),\(posInWorld[1]/posInWorld[3]),\(posInWorld[2]/posInWorld[3])")
-        
-        
-        
-        
+        x1 = 2 * (x1 - 0.5)
+        y1 = 2 * (0.5 - y1)
+        //println("\(x1),\(y1)")
+        return (x1,y1)
     }
     
-    func tap(viewController: MTLGameViewController) {
-        let pos :[Float] = [2 * Float(viewController.m_currentPosition.x/self.frame.size.width * UIScreen.mainScreen().scale) - 1.0,0.0,1 - Float(2 * viewController.m_currentPosition.y/self.frame.size.height * UIScreen.mainScreen().scale),1.0]
+    func pan(panGesture:UIPanGestureRecognizer){
+        let pos = panGesture.locationInView(self)
+        unproject(normalizeTouchPoint(pos.x, y: pos.y))
+    }
+    
+    
+    func unproject(pos:(Float,Float)){
+        let posNear = [pos.0,pos.1,1,1]
+        //let posFar = [pos.0,pos.1,-1,1]
+        let posViewNear = m_projectionMatrix * posNear
+        let posWorldNear = m_viewMatrix * posViewNear
+        //let posViewFar = m_projectionMatrix * posFar
+        //let posWorldFar = m_viewMatrix * posViewFar
+        //let end:[Float] = [posWorld[0],posWorld[1],posWorld[2]]
+        var dir:[Float] = [posWorldNear[0] - 400,posWorldNear[1] - 400,posWorldNear[2] - 400]
+        dir =  Matrix.normalize(dir)
         
-        let pos1 : [Float] = [Float(viewController.m_currentPosition.x),0.0,Float(viewController.m_currentPosition.y),1.0]
+        //let t = -400 / dir[1] * dir + [400,400,400]
+        //println(t)
+        println(dir)
+        ///println(-400.0 / dir[1])
+        //println("Position : \(posWorld[0]),\(posWorld[1]),\(posWorld[2]),\(posWorld[3]),Coming From: \(pos.0),\(pos.1)")
         
-        
-        let posInWorld = m_viewMatrix.inverse()! * m_projectionMatrix.inverse()! * pos1
-        println("\(pos1[0]),\(pos1[1]),\(pos1[2])")
-        println("Pos: \(posInWorld[0]/posInWorld[3]),\(posInWorld[1]/posInWorld[3]),\(posInWorld[2]/posInWorld[3])")
     }
     
     func pause(viewController: MTLGameViewController, willPause: Bool) {
@@ -195,6 +216,4 @@ class MTLGameScene:UIView,MTLGameViewControllerDelegate{
             println("continue")
         }
     }
-    
-    
 }

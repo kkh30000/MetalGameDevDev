@@ -189,7 +189,7 @@ fragment float4 phong_fragment_static(OutVertex in [[stage_in]],depth2d<float> s
     constexpr sampler shadow_sampler(coord::normalized, filter::linear, address::clamp_to_zero, compare_func::less);
     constexpr sampler texture_sampler;
     modelColor = modelTexture.sample(texture_sampler,in.texCoord);
-   //float shadow = shadow_texture.sample_compare(shadow_sampler, in.v_shadowcoord.xy/in.v_shadowcoord.w, in.v_shadowcoord.z/in.v_shadowcoord.w);
+    //float shadow = shadow_texture.sample_compare(shadow_sampler, in.v_shadowcoord.xy/in.v_shadowcoord.w, in.v_shadowcoord.z/in.v_shadowcoord.w);
     //计算漫反射
     float3 n = normalize(in.normal_camerasapce);
     float3 l = normalize(in.light_direction_camerasapce);
@@ -202,7 +202,7 @@ fragment float4 phong_fragment_static(OutVertex in [[stage_in]],depth2d<float> s
     float3 r = -l + 2.0 * n_dot_l * n;
     float e_dot_r = saturate(dot(e,r));
     float4 specular_color = materialSpecularColor * in.lightcolor0 * pow(e_dot_r,materialShine);
-    color = float4(float3(modelColor.rgb +  (diffuse_color.rgb + specular_color.rgb)),1.0);
+    color = float4(float3(modelColor.rgb + (diffuse_color.rgb + specular_color.rgb)),1.0);
     //color = half4((half4(0.15,0.85,0.1,1.0) + half4(diffuse_color + specular_color)).xyz,shadow);
     return color;
 }
@@ -275,7 +275,7 @@ fragment half4 render_to_screen_fragment(FinalVertexOut in [[stage_in]],texture2
     constexpr sampler finalSampler;
     //return half4(tex2D.sample(finalSampler,in.m_TexCoord));
     float3 luma = float3(0.299,0.587,0.114);
-    float2 resolution = float2(1.0/1024.0,1.0/768.0);
+    float2 resolution = float2(1.0/1920.0,1.0/1080.0);
     //float2 resoVerse = float2(1024,768);
     //float3 daf= tex2D.sample(finalSampler,in.m_TexCoord.xy,int2(0,-1)).xyz;
     auto lumaNw = dot(luma,float3(tex2D.sample(finalSampler,in.m_TexCoord.xy ,int2(-1,-1)).xyz));

@@ -34,7 +34,6 @@ class MTLCamera:NSObject {
         m_viewMatrix!.rotate(forward,r: up)
         m_pos = m_pos + forward * (Matrix.normalize(up))
         
-        
     }
     
     func lookLeftRight(forward:Float){

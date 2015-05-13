@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import Accelerate
 
 class Matrix:NSObject {
     var m_raw:[[Float]]! = nil
@@ -37,85 +38,33 @@ class Matrix:NSObject {
         }
     }
     
-    
-    func inverse()->Matrix?{
-        var iis:[Int] = [Int](count: 4, repeatedValue: 0)
-        var jjs:[Int] = [Int](count: 4, repeatedValue: 0)
         
-        var fDet:Float = 1.0
-        var f:Int = 1
+    func inverse(){
+        //public func inv(x : Matrix<Float>) -> Matrix<Float> {
+            //precondition(x.rows == x.columns, "Matrix must be square")
         
-        for var k = 0 ; k < 4 ; ++k{
-            var fMax:Float = 0.0
-            for  var i = k ; i < 4; ++i{
-                for var j = k ; j < 4; ++j{
-                    let temp:Float = abs(self[(i,j)])
-                    if temp > fMax{
-                        fMax = temp
-                        iis[k] = i
-                        jjs[k] = j
-                    }
-                }
-            }
-            if abs(fMax) < 0.0001{
-                return self
-            }
-            if iis[k] != k {
-                f = -f
-                swap(&self[(k,0)], &self[(iis[k],0)])
-                swap(&self[(k,1)], &self[(iis[k],1)])
-                swap(&self[(k,2)], &self[(iis[k],2)])
-                swap(&self[(k,3)], &self[(iis[k],3)])
-                
-                
-            }
-            if jjs[k] != k {
-                f = -f
-                swap(&self[(0,k)], &self[(0,jjs[k])])
-                swap(&self[(1,k)], &self[(1,jjs[k])])
-                swap(&self[(2,k)], &self[(2,jjs[k])])
-                swap(&self[(3,k)], &self[(3,jjs[k])])
-            }
-            fDet *= self[(k,k)]
+            var ipiv = [__CLPK_integer](count: 4 * 4, repeatedValue: 0)
+            var lwork = __CLPK_integer(4 * 4)
+            var work = [CFloat](count: Int(lwork), repeatedValue: 0.0)
+            var error: __CLPK_integer = 0
+            var nc = __CLPK_integer(4)
+            //reverse(results)
+        var data:[Float] =   [
+            m_raw[0][0],m_raw[1][0],m_raw[2][0],m_raw[3][0],
+            m_raw[0][1],m_raw[1][1],m_raw[2][1],m_raw[3][1],
+            m_raw[0][2],m_raw[1][2],m_raw[2][2],m_raw[3][2],
+            m_raw[0][3],m_raw[1][3],m_raw[2][3],m_raw[3][3],
+        ]
+
+            sgetrf_(&nc, &nc, &(data), &nc, &ipiv, &error)
+            sgetri_(&nc, &(data), &nc, &ipiv, &work, &lwork, &error)
             
-            self[(k,k)] = 1.0/self[(k,k)]
-            for var j = 0 ; j < 4 ; ++j{
-                if j != k{
-                    self[(k,j)] *= self[(k,k)]
-                }
-            }
-            for var i = 0 ; i < 4 ; ++i{
-                if i != k {
-                    for var j = 0 ; j < 4 ; ++j{
-                        if j != k{
-                            self[(i,j)] -= self[(i,k)] * self[(k,j)]
-                        }
-                    }
-                }
-            }
-            for var i = 0 ; i < 4 ; ++i{
-                if i != k{
-                    self[(i,k)] *= -self[(k,k)]
-                }
-            }
-        }
-        for var k = 3 ; k >= 0; --k{
-            if jjs[k] != k{
-                swap(&self[(k,0)], &self[(jjs[k],0)])
-                swap(&self[(k,1)], &self[(jjs[k],1)])
-                swap(&self[(k,2)], &self[(jjs[k],2)])
-                swap(&self[(k,3)], &self[(jjs[k],3)])
-                
-            }
-            if iis[k] != k{
-                swap(&self[(0,k)], &self[(0,iis[k])])
-                swap(&self[(1,k)], &self[(1,iis[k])])
-                swap(&self[(2,k)], &self[(2,iis[k])])
-                swap(&self[(3,k)], &self[(3,iis[k])])
-                
-            }
-        }
-        return self
+            assert(error == 0, "Matrix not invertible")
+            self.m_raw[0] = [data[0],data[4],data[8],data[12]]
+            self.m_raw[1] = [data[1],data[5],data[9],data[13]]
+            self.m_raw[2] = [data[2],data[6],data[10],data[14]]
+            self.m_raw[3] = [data[3],data[7],data[11],data[15]]
+
         
     }
     
@@ -350,7 +299,7 @@ class Matrix:NSObject {
             }
         }
         
-        
+        Matrix.reverse(right)
         return matrix
     }
     
@@ -387,6 +336,7 @@ func +(left:[Float],right:[Float])->[Float]{
     return result
 }
 
+
 func -(left:[Float],right:[Float])->[Float]{
     let size = left.count
     var result:[Float] = [Float](count: size, repeatedValue: 0.0)
@@ -408,10 +358,11 @@ func *(left : Float,right:[Float])->[Float]{
 func *(left:Matrix,right:[Float])->[Float]{
     //left.inverse()
     Matrix.reverse(left)
-    let x = left.m_raw[0] * right
-    let y = left.m_raw[1] * right
-    let z = left.m_raw[2] * right
-    let w = left.m_raw[3] * right
+    let x:Float = left.m_raw[0] * right
+    let y:Float = left.m_raw[1] * right
+    let z:Float = left.m_raw[2] * right
+    let w:Float = left.m_raw[3] * right
+    Matrix.reverse(left)
     return [x,y,z,w]
     
 }

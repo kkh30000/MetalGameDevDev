@@ -35,7 +35,6 @@
 		577EE6F51AE617D200BE78F4 /* MTLCamera.swift in Sources */ = {isa = PBXBuildFile; fileRef = 577EE6F41AE617D200BE78F4 /* MTLCamera.swift */; };
 		5797B5251AE6B65A0051A2B4 /* animation1.json in Resources */ = {isa = PBXBuildFile; fileRef = 5797B5241AE6B65A0051A2B4 /* animation1.json */; };
 		57ABF1A41AED3A6D0032AE6D /* MTLTextureLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57ABF1A31AED3A6D0032AE6D /* MTLTextureLoader.swift */; };
-		57B055021AFF4CC600ACF455 /* invoker.json in Resources */ = {isa = PBXBuildFile; fileRef = 57B055011AFF4CC600ACF455 /* invoker.json */; };
 		57C1E2AD1AE6A4E300BCD75A /* animation.json in Resources */ = {isa = PBXBuildFile; fileRef = 57C1E2AC1AE6A4E300BCD75A /* animation.json */; };
 		57F6B9E81AF8BEFF00719215 /* MTLPVRTexture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57F6B9E71AF8BEFF00719215 /* MTLPVRTexture.swift */; };
 /* End PBXBuildFile section */
@@ -86,7 +85,6 @@
 		577EE6F61AE618A400BE78F4 /* MetalGameDev-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MetalGameDev-Bridging-Header.h"; sourceTree = "<group>"; };
 		5797B5241AE6B65A0051A2B4 /* animation1.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = animation1.json; sourceTree = "<group>"; };
 		57ABF1A31AED3A6D0032AE6D /* MTLTextureLoader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MTLTextureLoader.swift; sourceTree = "<group>"; };
-		57B055011AFF4CC600ACF455 /* invoker.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = invoker.json; sourceTree = "<group>"; };
 		57C1E2AC1AE6A4E300BCD75A /* animation.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = animation.json; sourceTree = "<group>"; };
 		57F6B9E71AF8BEFF00719215 /* MTLPVRTexture.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MTLPVRTexture.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -132,7 +130,6 @@
 			children = (
 				57270BB81AE615A700AAE3F2 /* AppDelegate.swift */,
 				57270BD81AE615D200AAE3F2 /* MetalGameViewController.swift */,
-				57B055011AFF4CC600ACF455 /* invoker.json */,
 				57270BDA1AE615FB00AAE3F2 /* MetalGameScene.swift */,
 				57270BDC1AE6162D00AAE3F2 /* MetalGamePlayer.swift */,
 				57270BDE1AE6164600AAE3F2 /* MetalActor.swift */,
@@ -274,7 +271,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				57B055021AFF4CC600ACF455 /* invoker.json in Resources */,
 				574643FE1AFA07F300214BBB /* invoker_color.png in Resources */,
 				57270BBE1AE615A700AAE3F2 /* Main.storyboard in Resources */,
 				5797B5251AE6B65A0051A2B4 /* animation1.json in Resources */,
