@@ -27,12 +27,15 @@ class MTLMVPUniform: MTLUniform {
     }
     func setModelMatrix(model:[Float]){
         m_mvpMatrix[0...15] = model[0...15]
+        //update()
     }
     func setViewMatrix(view:[Float]){
         m_mvpMatrix[16...31] = view[0...15]
+        //update()
     }
     func setProjectionMatrix(projection:[Float]){
         m_mvpMatrix[32...47] = projection[0...15]
+        //update()
     }
     
     func update() {

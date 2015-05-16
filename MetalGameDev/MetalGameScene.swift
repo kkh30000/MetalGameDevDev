@@ -68,11 +68,14 @@ class MTLGameScene:UIView,MTLGameViewControllerDelegate{
         
         
         var panGesture = UIPanGestureRecognizer(target: self, action: "pan:")
-        panGesture.maximumNumberOfTouches = 1
+        //panGesture.maximumNumberOfTouches = 1
         self.addGestureRecognizer(panGesture)
         
-        m_viewWidth = Float(self.frame.width)
-        m_viewHeight = Float(self.frame.height) * 0.9
+    
+        //m_viewHeight = 600
+        println(UIScreen.mainScreen().applicationFrame)
+        m_viewHeight = Float(UIScreen.mainScreen().applicationFrame.size.height)
+        m_viewWidth = Float(UIScreen.mainScreen().applicationFrame.size.width)
         //println(self.frame.width)
         //println(self.frame.height)
         
@@ -85,7 +88,7 @@ class MTLGameScene:UIView,MTLGameViewControllerDelegate{
 
         var mesh = MTLMesh(meshAsset: MeshAssets(filePath: "humanoid"), scene: self,vertexShader:"vertexShader",fragmentShader:"phong_fragment",drawType:MTLPrimitiveType.Triangle,depthType:MTLPixelFormat.Depth32Float)
         var mesh3 = MTLMesh(meshAsset: MeshAssets(filePath: "humanoid"), scene: self,vertexShader:"vertexShader",fragmentShader:"phong_fragment",drawType:MTLPrimitiveType.Triangle,depthType:MTLPixelFormat.Depth32Float)
-        var mesh1 = MTLMesh(meshAsset: MeshAssets(vertexArray:  plat_vertex, indices: plat_indices), scene: self,vertexShader:"vertexShader_Static",fragmentShader:"phong_fragment_static_1",drawType:MTLPrimitiveType.Triangle,depthType:MTLPixelFormat.Depth32Float)
+        var mesh1 = MTLMesh(meshAsset: MeshAssets(vertexArray:  plat_vertex, indices: plat_indices), scene: self,vertexShader:"vertexShader_Static_temp",fragmentShader:"phong_fragment_static_1",drawType:MTLPrimitiveType.Triangle,depthType:MTLPixelFormat.Depth32Float)
         var mesh2 = MTLMesh(meshAsset: MeshAssets(vertexArray:axis_vertex, indices: axis_indices), scene: self,vertexShader:"vertexShader_Static",fragmentShader:"phong_fragment_static",drawType:MTLPrimitiveType.Line,depthType:MTLPixelFormat.Depth32Float)
         var meshCK = MTLMesh(meshAsset: MeshAssets(filePath: "ck"), scene: self, vertexShader: "vertexShader_Static", fragmentShader: "phong_fragment_static", drawType:MTLPrimitiveType.Triangle, depthType: MTLPixelFormat.Depth32Float)
         var actorCK = MTLActor(mesh: meshCK, animationController: nil)
@@ -96,14 +99,14 @@ class MTLGameScene:UIView,MTLGameViewControllerDelegate{
         //var actor1 = MTLActor(mesh: mesh1, animationController: nil)
         m_modelMatrix = Matrix()
         m_player = MTLGamePlayer(scene: self)
-        m_uniform = MTLMVPUniform(model: Matrix(), view: MTLCamera(pos: [400,400,400], target: [0,0,0], up: [0,1,0]).viewMatrix(), projection: Matrix.MatrixMakeFrustum_oc(-1.01, right: 1.01, bottom: -1.01, top: 1.01, near: 1.01, far: 1000.01), device: m_device!, player: m_player)
+        m_uniform = MTLMVPUniform(model: Matrix(), view: MTLCamera(pos: [700,700,700], target: [0,0,0], up: [0,1,0]).viewMatrix(), projection: Matrix.MatrixMakeFrustum_oc(-1, right: 1, bottom: -1, top: 1, near: 699, far: -1000), device: m_device!, player: m_player)
         m_player!.prepareActors([actorCK,actor1,actor4,actor2,actor3])
         //var sucess : UnsafeMutablePointer<Bool> = UnsafeMutablePointer()
-        m_viewMatrix = Matrix.MatrixMakeLookAt([400,400,400], center: [0,0,0], up: [0,1,0])
+        m_viewMatrix = Matrix.MatrixMakeLookAt([700,700,700], center: [0,0,0], up: [0,1,0])
         m_viewMatrix.inverse()
         //m_viewMatrix.GLKToSwfit(GLKMatrix4MakeLookAt(400, 400, 400, 0, 0, 0, 0, 1, 0))
         
-        m_projectionMatrix = Matrix.MatrixMakeFrustum_oc(-1, right: 1, bottom: -1, top: 1, near: 1, far: 1000)
+        m_projectionMatrix = Matrix.MatrixMakeFrustum_oc(-1, right: 1, bottom: -1, top: 1, near: 699, far: -1000)
         m_projectionMatrix.inverse()
         
         //println(m_projectionMatrix.raw())
@@ -175,8 +178,8 @@ class MTLGameScene:UIView,MTLGameViewControllerDelegate{
     
     
     func normalizeTouchPoint(x:CGFloat,y:CGFloat)->(Float,Float){
-        var x1:Float = Float(x) / m_viewHeight
-        var y1:Float = Float(y) / m_viewWidth
+        var x1:Float = Float(x) / m_viewWidth
+        var y1:Float = Float(y) / m_viewHeight
         
         x1 = 2 * (x1 - 0.5)
         y1 = 2 * (0.5 - y1)
@@ -186,27 +189,30 @@ class MTLGameScene:UIView,MTLGameViewControllerDelegate{
     
     func pan(panGesture:UIPanGestureRecognizer){
         let pos = panGesture.locationInView(self)
-        unproject(normalizeTouchPoint(pos.x, y: pos.y))
+        //println(pos)
+        let posInWorld = unproject(normalizeTouchPoint(pos.x, y: pos.y))
+        //m_modelMatrix.translate(posInWorld[0], y: posInWorld[1], z: posInWorld[2])
+        println(posInWorld)
+        let translate = Matrix.MatrixMakeTranslate(posInWorld[0], y: posInWorld[1], z: posInWorld[2])
+        //println)
+        m_uniform.setModelMatrix(translate.raw())
+        //m_uniform.update()
+        m_player.m_lightUniform.setModelMatrix(translate.raw())
+        //m_modelMatrix = Matrix()
     }
     
     
-    func unproject(pos:(Float,Float)){
-        let posNear = [pos.0,pos.1,1,1]
-        //let posFar = [pos.0,pos.1,-1,1]
+    func unproject(pos:(Float,Float))->[Float]{
+        let posNear = [pos.0,pos.1,699,1]
+        let posFar = [pos.0,pos.1,-1000,1]
         let posViewNear = m_projectionMatrix * posNear
         let posWorldNear = m_viewMatrix * posViewNear
-        //let posViewFar = m_projectionMatrix * posFar
-        //let posWorldFar = m_viewMatrix * posViewFar
-        //let end:[Float] = [posWorld[0],posWorld[1],posWorld[2]]
-        var dir:[Float] = [posWorldNear[0] - 400,posWorldNear[1] - 400,posWorldNear[2] - 400]
+        let posViewFar = m_projectionMatrix * posFar
+        let posWorldFar = m_viewMatrix * posViewFar
+        var dir:[Float] = -1 * [posWorldNear[0]/posWorldNear[3] - posWorldFar[0]/posWorldFar[3],posWorldNear[1]/posWorldNear[3] - posWorldFar[1]/posWorldFar[3],posWorldNear[2]/posWorldNear[3] - posWorldFar[2]/posWorldFar[3]]
         dir =  Matrix.normalize(dir)
-        
-        //let t = -400 / dir[1] * dir + [400,400,400]
+        return (-700.0 / dir[1]) * dir + [700,700,700]
         //println(t)
-        println(dir)
-        ///println(-400.0 / dir[1])
-        //println("Position : \(posWorld[0]),\(posWorld[1]),\(posWorld[2]),\(posWorld[3]),Coming From: \(pos.0),\(pos.1)")
-        
     }
     
     func pause(viewController: MTLGameViewController, willPause: Bool) {

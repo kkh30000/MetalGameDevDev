@@ -350,7 +350,7 @@ func *(left : Float,right:[Float])->[Float]{
     let size = right.count
     var result:[Float] = [Float](count: size, repeatedValue: 0.0)
     for var i = 0 ; i < size ; ++i{
-        result[i] *= left
+        result[i] = right[i] * left
     }
     return result
 }
