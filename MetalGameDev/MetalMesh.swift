@@ -71,8 +71,9 @@ class MTLMesh:NSObject {
     var m_fragmentShader:String?
     var m_meshType:MTLPrimitiveType?
     var m_depthType:MTLPixelFormat?
+    var m_blendingEnable:Bool!  = nil
     
-    init(meshAsset:MeshAssets,scene:MTLGameScene,vertexShader:String,fragmentShader:String,drawType:MTLPrimitiveType,depthType:MTLPixelFormat) {
+    init(meshAsset:MeshAssets,scene:MTLGameScene,vertexShader:String,fragmentShader:String,drawType:MTLPrimitiveType,depthType:MTLPixelFormat,blendingEnable:Bool) {
         super.init()
         m_meshType = drawType
         m_depthType = depthType
@@ -81,13 +82,14 @@ class MTLMesh:NSObject {
         m_vertexShader = vertexShader
         m_fragmentShader = fragmentShader
         m_meshAssets = meshAsset
+        m_blendingEnable = blendingEnable
         m_vertexBuffer = device.newBufferWithBytes(meshAsset.m_vertexArray!, length: meshAsset.vertexArrayLength(), options: nil)
         if m_meshAssets.m_vertexIndices != nil{
             m_indexBuffer = device.newBufferWithBytes(meshAsset.m_vertexIndices!, length: meshAsset.vertexIndicesLength(), options: nil)
         }
         //prepareRenderPipeLineStateWithShaderName(device, vertexShader: vertexShader, fragmentShader: fragmentShader)
     }
-    func prepareRenderPipeLineStateWithShaderName(device:MTLDevice,vertexShader:String,fragmentShader:String,depthPixelFormat:MTLPixelFormat,renderPipeLineDescriptor:MTLRenderPipelineDescriptor){
+    func prepareRenderPipeLineStateWithShaderName(device:MTLDevice,vertexShader:String,fragmentShader:String,depthPixelFormat:MTLPixelFormat,renderPipelineDesc:MTLRenderPipelineDescriptor){
         let library = device.newDefaultLibrary()
         if library == nil{
             return
@@ -95,13 +97,26 @@ class MTLMesh:NSObject {
         var vertexShader = library!.newFunctionWithName(vertexShader)
         var fragmentShader = library!.newFunctionWithName(fragmentShader)
         //var renderPipeLineDescriptor = MTLRenderPipelineDescriptor()
-        renderPipeLineDescriptor.vertexFunction = vertexShader
-        renderPipeLineDescriptor.fragmentFunction = fragmentShader
-        renderPipeLineDescriptor.colorAttachments[0].pixelFormat = MTLPixelFormat.BGRA8Unorm
-        renderPipeLineDescriptor.depthAttachmentPixelFormat = depthPixelFormat
+        renderPipelineDesc.vertexFunction = vertexShader
+        renderPipelineDesc.fragmentFunction = fragmentShader
+        renderPipelineDesc.colorAttachments[0].pixelFormat = MTLPixelFormat.BGRA8Unorm
+        if m_blendingEnable == true{
+            renderPipelineDesc.colorAttachments[0].blendingEnabled = true
+            renderPipelineDesc.colorAttachments[0].writeMask = MTLColorWriteMask.All
+            renderPipelineDesc.colorAttachments[0].rgbBlendOperation = MTLBlendOperation.Add
+            renderPipelineDesc.colorAttachments[0].alphaBlendOperation = MTLBlendOperation.Add
+            //renderPipelineDesc.colorAttachments[0]
+            renderPipelineDesc.colorAttachments[0].sourceRGBBlendFactor = MTLBlendFactor.SourceAlpha
+            renderPipelineDesc.colorAttachments[0].sourceAlphaBlendFactor = MTLBlendFactor.SourceAlpha
+            renderPipelineDesc.colorAttachments[0].destinationRGBBlendFactor = MTLBlendFactor.OneMinusBlendAlpha;
+            renderPipelineDesc.colorAttachments[0].destinationAlphaBlendFactor = MTLBlendFactor.OneMinusBlendAlpha;
+        }else{
+            renderPipelineDesc.colorAttachments[0].blendingEnabled = false
+        }
+        renderPipelineDesc.depthAttachmentPixelFormat = depthPixelFormat
         var error:NSErrorPointer
-        renderPipeLineDescriptor.stencilAttachmentPixelFormat = MTLPixelFormat.Stencil8
-        m_renderPipeLineState = device.newRenderPipelineStateWithDescriptor(renderPipeLineDescriptor, error: nil)
+        renderPipelineDesc.stencilAttachmentPixelFormat = MTLPixelFormat.Stencil8
+        m_renderPipeLineState = device.newRenderPipelineStateWithDescriptor(renderPipelineDesc, error: nil)
     }
     
     

@@ -74,11 +74,11 @@ class MTLGamePlayer: NSObject{
         m_currentUniform = 0
         
         //初始化light pespetive
-        m_lightUniform = MTLMVPUniform(model: Matrix(), view: MTLCamera(pos: [1,800,1], target: [0,0,0], up: [0,1,0]).viewMatrix(), projection:Matrix.MatrixMakePerpective_fov(90, aspect: Float(m_scene!.frame.width)/Float(m_scene!.frame.height), near: 0.1, far: -1000), device: m_scene!.m_device!, player: self)
+        m_lightUniform = MTLMVPUniform(model: Matrix(), view: MTLCamera(pos: [1,1500,1], target: [0,0,0], up: [0,1,0]).viewMatrix(), projection:Matrix.MatrixMakePerpective_fov(90, aspect: Float(m_scene!.frame.width)/Float(m_scene!.frame.height), near: 0.1, far: -1000), device: m_scene!.m_device!, player: self)
         var modelView = Matrix()
         modelView.scale(Float(m_scene!.frame.size.width) / Float(m_scene!.frame.size.height), y: 1, z: 1)
         m_renderToScreenUniform = MTLMVPUniform(model: Matrix(), view: MTLCamera(pos: [0,0,0], target: [0,0,1], up: [0,1,0]).viewMatrix(), projection: Matrix.MatrixMakePerpective_fov(90, aspect: Float(m_scene!.frame.size.width)/Float(m_scene!.frame.size.width), near: 0.1, far: 1.00), device: m_scene!.m_device!, player: self)
-        var light0 = MTLSpotLight(pos: [1,1000,1], attenuation: 0.0, color: [1.0,1.0,1.0,1.0])
+        var light0 = MTLSpotLight(pos: [1,1500,1], attenuation: 0.0, color: [1.0,1.0,1.0,1.0])
         
         m_lights = MTLLights(lights: [light0], device: m_scene!.m_device!)
         
@@ -111,7 +111,7 @@ class MTLGamePlayer: NSObject{
         //Second Pass:Render Into Texture
         renderPipeLineStateDesc.label = "Sencond Pass: Render Into Texture"
         for actor in m_actors!{
-            actor.m_mesh.prepareRenderPipeLineStateWithShaderName(m_scene!.m_device!, vertexShader: actor.m_mesh.m_vertexShader!, fragmentShader: actor.m_mesh.m_fragmentShader!, depthPixelFormat: m_deptPixelFormat!,renderPipeLineDescriptor: renderPipeLineStateDesc)
+            actor.m_mesh.prepareRenderPipeLineStateWithShaderName(m_scene!.m_device!, vertexShader: actor.m_mesh.m_vertexShader!, fragmentShader: actor.m_mesh.m_fragmentShader!, depthPixelFormat: m_deptPixelFormat!,renderPipelineDesc: renderPipeLineStateDesc)
         }
         
         //Final Pass: Render Into Screen
@@ -241,9 +241,16 @@ class MTLGamePlayer: NSObject{
             paraCommandEncoders[i].setVertexBuffer(m_lightUniform[m_currentUniform!], offset: 0, atIndex: 3)
             paraCommandEncoders[i].setVertexBuffer(m_actors![i].m_mesh.m_vertexBuffer, offset: 0, atIndex: 0)
             paraCommandEncoders[i].setFragmentTexture(m_shadowMap!, atIndex: 0)
-            paraCommandEncoders[i].setFragmentTexture(m_scene!.m_textureLoader.texture, atIndex: 1)
+            //paraCommandEncoders[i].setFragmentTexture(m_scene!.m_textureLoader.texture, atIndex: 1)
+            if m_actors![i].m_texture != nil{
+                paraCommandEncoders[i].setFragmentTexture(m_actors![i].m_texture, atIndex: 1)
+            }else{
+                paraCommandEncoders[i].setFragmentTexture(m_scene!.m_textureLoader.texture, atIndex: 1)
+            }
+            if m_actors![i].m_normalMapping != nil{
+                paraCommandEncoders[i].setFragmentTexture(m_actors![i].m_normalMapping, atIndex: 2)
+            }
             paraCommandEncoders[i].setVertexBuffer(m_lights.m_uniformBuffer.m_uniform, offset: 0, atIndex: 4)
-            //paraCommandEncoders[i].setFragmentBuffer(, offset: <#Int#>, atIndex: <#Int#>)
             paraCommandEncoders[i].setRenderPipelineState(m_actors![i].m_mesh.m_renderPipeLineState!)
             if m_actors![i].m_mesh.m_meshAssets.m_vertexIndices == nil{
                 paraCommandEncoders[i].drawPrimitives(m_actors![i].m_mesh.m_meshType!, vertexStart: 0, vertexCount: 3, instanceCount: 1)
