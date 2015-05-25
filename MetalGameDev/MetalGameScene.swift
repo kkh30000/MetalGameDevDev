@@ -113,9 +113,9 @@ class MTLGameScene:UIView,MTLGameViewControllerDelegate{
         m_textureLoader.loadIntoTextureWithDevice(m_device!)
         actorCK.m_texture = m_textureLoader.texture
         
-        m_textureLoader = AAPLTexture2D(resourceName: "grass", ext: "png")
-        m_textureLoader.loadIntoTextureWithDevice(m_device!)
-        actor2.m_texture = m_textureLoader.texture
+        //m_textureLoader = AAPLTexture2D(resourceName: "grass", ext: "png")
+        //m_textureLoader.loadIntoTextureWithDevice(m_device!)
+        //actor2.m_texture = m_textureLoader.texture
         
         m_textureLoader = AAPLTexture2D(resourceName: "NormalMap", ext: "png")
         m_textureLoader.loadIntoTextureWithDevice(m_device!)
