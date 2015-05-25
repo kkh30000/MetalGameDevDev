@@ -8,6 +8,12 @@
 
 import Metal
 
+
+enum ActorType{
+    case DEFAULT
+    case PARTICLE
+}
+
 class MTLActor:NSObject{
     var m_mesh:MTLMesh! = nil
     var m_animationController:MTLAnimationController?
@@ -19,7 +25,8 @@ class MTLActor:NSObject{
     //var m_angleToTarget:Float = 0
     //var m_rotateUp:[Float]! = nil
     var m_scene:MTLGameScene! = nil
-    init(mesh:MTLMesh,animationController:MTLAnimationController?,pos:[Float]?,scene:MTLGameScene?,texture:MTLTexture?,normalmap:MTLTexture?) {
+    var m_actorType:ActorType! = ActorType.DEFAULT
+    init(mesh:MTLMesh?,animationController:MTLAnimationController?,pos:[Float]?,scene:MTLGameScene?,texture:MTLTexture?,normalmap:MTLTexture?) {
         super.init()
         m_mesh = mesh
         m_animationController = animationController

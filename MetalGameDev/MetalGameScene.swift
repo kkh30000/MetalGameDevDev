@@ -96,7 +96,7 @@ class MTLGameScene:UIView,MTLGameViewControllerDelegate{
         var actor4 = MTLActor(mesh: mesh3, animationController: MTLAnimationController(animationFileName: "animation1", scene: self),pos: nil,scene:nil,texture:nil,normalmap:nil)
         var actor2 = MTLActor(mesh: mesh1, animationController: nil,pos: nil,scene:nil,texture:nil,normalmap:nil)
         var actor3 = MTLActor(mesh: mesh2, animationController: nil,pos: nil,scene:nil,texture:nil,normalmap:nil)
-        //var actor1 = MTLActor(mesh: mesh1, animationController: nil)
+                //var actor1 = MTLActor(mesh: mesh1, animationController: nil)
         m_modelMatrix = Matrix()
         m_player = MTLGamePlayer(scene: self)
         m_uniform = MTLMVPUniform(model: Matrix(), view: MTLCamera(pos: [700,700,700], target: [0,0,0], up: [0,1,0]).viewMatrix(), projection: Matrix.MatrixMakeFrustum_oc(-1, right: 1, bottom: -1, top: 1, near: 699, far: -1000), device: m_device!, player: m_player)
@@ -120,9 +120,16 @@ class MTLGameScene:UIView,MTLGameViewControllerDelegate{
         m_textureLoader = AAPLTexture2D(resourceName: "NormalMap", ext: "png")
         m_textureLoader.loadIntoTextureWithDevice(m_device!)
         actor2.m_normalMapping = m_textureLoader.texture
+        let particle = MTLParticle(device: m_device!, numOfParticles: 100, spread: 1000, lifeSpan: 5)
+        let particle1 = MTLParticle(device: m_device!, numOfParticles: 10, spread: 1000, lifeSpan: 10)
+
+        var particleActor = MTLParticleActor(particle: particle, scene: self, vertexShader: "vertexParticle", fragmentShader: "fragmentParticle", drawType: MTLPrimitiveType.Point, deptType: MTLPixelFormat.Depth32Float, blendingEnable: true, actorType: ActorType.PARTICLE,mvpuniform:m_uniform)
         
+        var uniform = MTLMVPUniform(uniform: m_uniform, device: m_device!, player: m_player)
+        uniform.setModelMatrix(Matrix().raw())
+        var particleActor1 = MTLParticleActor(particle: particle1, scene: self, vertexShader: "vertexParticle", fragmentShader: "fragmentParticle", drawType: MTLPrimitiveType.Point, deptType: MTLPixelFormat.Depth32Float, blendingEnable: true, actorType: ActorType.PARTICLE,mvpuniform:uniform)
         
-        m_player!.prepareActors([actor2,actor1,actor4,actorCK,actor3])
+        m_player!.prepareActors([actor2,actor1,actor4,actorCK,actor3,particleActor,particleActor1])
       
         
     }
@@ -180,6 +187,11 @@ class MTLGameScene:UIView,MTLGameViewControllerDelegate{
     func updatePerFrame(viewcontroller: MTLGameViewController) {
         m_player.m_actors![1].m_animationController!.play(viewcontroller.m_gameTime, currentBuffer: m_player.m_currentUniform!)
         m_player.m_actors![2].m_animationController!.play(viewcontroller.m_gameTime * 0.8, currentBuffer: m_player.m_currentUniform!)
+        let particle = m_player.m_actors![5] as! MTLParticleActor
+        particle.updateParticle(viewcontroller)
+        let particle1 = m_player.m_actors![6] as! MTLParticleActor
+        particle1.updateParticle(viewcontroller)
+
         
     }
     

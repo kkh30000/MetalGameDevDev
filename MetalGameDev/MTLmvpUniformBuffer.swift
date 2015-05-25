@@ -25,6 +25,18 @@ class MTLMVPUniform: MTLUniform {
         }
         m_player = player
     }
+    
+    init(uniform:MTLMVPUniform,device:MTLDevice,player:MTLGamePlayer){
+        super.init(size: sizeofValue(uniform.m_data![0]) * 48, device: device)
+        m_mvpMatrix = [Float](count: 48, repeatedValue: 0.0)
+        m_mvpMatrix = uniform.m_mvpMatrix
+        for var i = 0 ; i < 3 ; ++i{
+            updateDataToUniform(m_mvpMatrix, toUniform: self[i])
+        }
+        m_player = player
+
+
+    }
     func setModelMatrix(model:[Float]){
         m_mvpMatrix[0...15] = model[0...15]
         //update()

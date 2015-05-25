@@ -74,11 +74,11 @@ class MTLGamePlayer: NSObject{
         m_currentUniform = 0
         
         //初始化light pespetive
-        m_lightUniform = MTLMVPUniform(model: Matrix(), view: MTLCamera(pos: [1,1500,1], target: [0,0,0], up: [0,1,0]).viewMatrix(), projection:Matrix.MatrixMakePerpective_fov(90, aspect: Float(m_scene!.frame.width)/Float(m_scene!.frame.height), near: 0.1, far: -1000), device: m_scene!.m_device!, player: self)
+        m_lightUniform = MTLMVPUniform(model: Matrix(), view: MTLCamera(pos: [1,500,1], target: [0,0,0], up: [0,1,0]).viewMatrix(), projection:Matrix.MatrixMakePerpective_fov(90, aspect: Float(m_scene!.frame.width)/Float(m_scene!.frame.height), near: 0.1, far: -1000), device: m_scene!.m_device!, player: self)
         var modelView = Matrix()
         modelView.scale(Float(m_scene!.frame.size.width) / Float(m_scene!.frame.size.height), y: 1, z: 1)
         m_renderToScreenUniform = MTLMVPUniform(model: Matrix(), view: MTLCamera(pos: [0,0,0], target: [0,0,1], up: [0,1,0]).viewMatrix(), projection: Matrix.MatrixMakePerpective_fov(90, aspect: Float(m_scene!.frame.size.width)/Float(m_scene!.frame.size.width), near: 0.1, far: 1.00), device: m_scene!.m_device!, player: self)
-        var light0 = MTLSpotLight(pos: [1,1500,1], attenuation: 0.0, color: [1.0,1.0,1.0,1.0])
+        var light0 = MTLSpotLight(pos: [1,500,1], attenuation: 0.0, color: [1.0,1.0,1.0,1.0])
         
         m_lights = MTLLights(lights: [light0], device: m_scene!.m_device!)
         
@@ -144,13 +144,22 @@ class MTLGamePlayer: NSObject{
         var paraCommanderEncoder = commandBuffer.parallelRenderCommandEncoderWithDescriptor(m_shadowRenderPassDesc)
         //paraCommanderEncoder!.pushDebugGroup("Shadow Mapping")
         var paraCommandEncoders :[MTLRenderCommandEncoder] = []
-        
+        //粒子 不需要渲染阴影
         for var i = 0 ; i < m_actors!.count ; ++i{
+            if m_actors![i].m_actorType == ActorType.PARTICLE{
+                continue
+            }
             paraCommandEncoders.append(paraCommanderEncoder!.renderCommandEncoder())
+            
         }
         
         
         for var i = 0; i < m_actors!.count ; ++i{
+            //粒子 不需要渲染阴影
+            if m_actors![i].m_actorType == ActorType.PARTICLE{
+                //println("Pariticle System")
+                continue
+            }
             if m_actors![i].m_animationController != nil{
                 paraCommandEncoders[i].setRenderPipelineState(m_shadowRenderPipelineState)
                 //paraCommandEncoders[i].setCullMode(MTLCullMode.Back)
@@ -229,37 +238,56 @@ class MTLGamePlayer: NSObject{
         for var i = 0 ; i < m_actors!.count ; ++i{
             paraCommandEncoders.append(paraCommanderEncoder!.renderCommandEncoder())
         }
-        for var i = 0; i < m_actors!.count ; ++i{
-            //paraCommandEncoders[i].setCullMode(MTLCullMode.)
-            if m_actors![i].m_mesh.m_depthType != MTLPixelFormat.Invalid{
-                paraCommandEncoders[i].setDepthStencilState(m_depthState!)
-            }
-            paraCommandEncoders[i].setVertexBuffer(m_scene!.m_uniform![m_currentUniform!], offset: 0, atIndex: 1)
-            if m_actors![i].m_animationController != nil{
-                paraCommandEncoders[i].setVertexBuffer(m_actors![i].m_animationController!.m_uniformBuffer[m_currentUniform!], offset: 0, atIndex: 2)
-            }
-            paraCommandEncoders[i].setVertexBuffer(m_lightUniform[m_currentUniform!], offset: 0, atIndex: 3)
-            paraCommandEncoders[i].setVertexBuffer(m_actors![i].m_mesh.m_vertexBuffer, offset: 0, atIndex: 0)
-            paraCommandEncoders[i].setFragmentTexture(m_shadowMap!, atIndex: 0)
-            //paraCommandEncoders[i].setFragmentTexture(m_scene!.m_textureLoader.texture, atIndex: 1)
-            if m_actors![i].m_texture != nil{
-                paraCommandEncoders[i].setFragmentTexture(m_actors![i].m_texture, atIndex: 1)
-            }else{
-                paraCommandEncoders[i].setFragmentTexture(m_scene!.m_textureLoader.texture, atIndex: 1)
-            }
-            if m_actors![i].m_normalMapping != nil{
-                paraCommandEncoders[i].setFragmentTexture(m_actors![i].m_normalMapping, atIndex: 2)
-            }
-            paraCommandEncoders[i].setVertexBuffer(m_lights.m_uniformBuffer.m_uniform, offset: 0, atIndex: 4)
-            paraCommandEncoders[i].setRenderPipelineState(m_actors![i].m_mesh.m_renderPipeLineState!)
-            if m_actors![i].m_mesh.m_meshAssets.m_vertexIndices == nil{
-                paraCommandEncoders[i].drawPrimitives(m_actors![i].m_mesh.m_meshType!, vertexStart: 0, vertexCount: 3, instanceCount: 1)
-            }else{
-                paraCommandEncoders[i].drawIndexedPrimitives(m_actors![i].m_mesh.m_meshType!, indexCount: m_actors![i].m_mesh.m_meshAssets!.m_vertexIndices!.count, indexType: MTLIndexType.UInt16, indexBuffer: m_actors![i].m_mesh.m_indexBuffer!, indexBufferOffset: 0, instanceCount: 1)
-            }
-            paraCommandEncoders[i].endEncoding()
-        }
         
+        //渲染粒子actor
+        
+        
+        
+        //渲染一般actor
+        for var i = 0; i < m_actors!.count ; ++i{
+            if m_actors![i].m_actorType == ActorType.DEFAULT{
+                 //paraCommandEncoders[i].setCullMode(MTLCullMode.)
+                if m_actors![i].m_mesh.m_depthType != MTLPixelFormat.Invalid{
+                    paraCommandEncoders[i].setDepthStencilState(m_depthState!)
+                }
+                paraCommandEncoders[i].setVertexBuffer(m_scene!.m_uniform![m_currentUniform!], offset: 0, atIndex: 1)
+                if m_actors![i].m_animationController != nil{
+                    paraCommandEncoders[i].setVertexBuffer(m_actors![i].m_animationController!.m_uniformBuffer[m_currentUniform!], offset: 0, atIndex: 2)
+                }
+                paraCommandEncoders[i].setVertexBuffer(m_lightUniform[m_currentUniform!], offset: 0, atIndex: 3)
+                paraCommandEncoders[i].setVertexBuffer(m_actors![i].m_mesh.m_vertexBuffer, offset: 0, atIndex: 0)
+                paraCommandEncoders[i].setFragmentTexture(m_shadowMap!, atIndex: 0)
+                //paraCommandEncoders[i].setFragmentTexture(m_scene!.m_textureLoader.texture, atIndex: 1)
+                if m_actors![i].m_texture != nil{
+                    paraCommandEncoders[i].setFragmentTexture(m_actors![i].m_texture, atIndex: 1)
+                }else{
+                    paraCommandEncoders[i].setFragmentTexture(m_scene!.m_textureLoader.texture, atIndex: 1)
+                }
+                if m_actors![i].m_normalMapping != nil{
+                    paraCommandEncoders[i].setFragmentTexture(m_actors![i].m_normalMapping, atIndex: 2)
+                }
+                paraCommandEncoders[i].setVertexBuffer(m_lights.m_uniformBuffer.m_uniform, offset: 0, atIndex: 4)
+                paraCommandEncoders[i].setRenderPipelineState(m_actors![i].m_mesh.m_renderPipeLineState!)
+                if m_actors![i].m_mesh.m_meshAssets.m_vertexIndices == nil{
+                    paraCommandEncoders[i].drawPrimitives(m_actors![i].m_mesh.m_meshType!, vertexStart: 0, vertexCount: 3, instanceCount: 1)
+                }else{
+                    paraCommandEncoders[i].drawIndexedPrimitives(m_actors![i].m_mesh.m_meshType!, indexCount: m_actors![i].m_mesh.m_meshAssets!.m_vertexIndices!.count, indexType: MTLIndexType.UInt16, indexBuffer: m_actors![i].m_mesh.m_indexBuffer!, indexBufferOffset: 0, instanceCount: 1)
+                }
+                paraCommandEncoders[i].endEncoding()
+
+            }else if m_actors![i].m_actorType == ActorType.PARTICLE{
+                let particle:MTLParticleActor = m_actors![i] as! MTLParticleActor
+                //particle.m_mvp.update()
+                paraCommandEncoders[i].setVertexBuffer(particle.m_mvp[m_currentUniform!], offset: 0, atIndex: 0)
+                paraCommandEncoders[i].setVertexBuffer(particle.m_initialDirectionBuffer, offset: 0, atIndex: 1)
+                paraCommandEncoders[i].setVertexBuffer(particle.m_birthOffsetBuffer, offset: 0, atIndex: 2)
+                paraCommandEncoders[i].setVertexBuffer(particle.m_particleUniform[m_currentUniform!], offset: 0, atIndex: 3)
+                paraCommandEncoders[i].setRenderPipelineState(particle.m_mesh.m_renderPipeLineState!)
+                paraCommandEncoders[i].drawPrimitives(m_actors![i].m_mesh!.m_meshType!, vertexStart: 0, vertexCount: particle.m_particle.m_numOfParticles)
+                paraCommandEncoders[i].endEncoding()
+            }
+            
+        }
         paraCommanderEncoder!.endEncoding()
         // m_scene!.m_uniform!.updateDataToUniform(m_scene!.m_mvpMatrix, toUniform: m_scene!.m_uniform[m_currentUniform!])
     }

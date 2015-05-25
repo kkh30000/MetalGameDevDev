@@ -10,54 +10,6 @@ import Foundation
 import Metal
 
 
-class MeshAssets:NSObject {
-    var m_vertexArray:[Float]?
-    var m_vertexIndices:[UInt16]?
-    //var m_jsonDict:NSDictionary! = nil
-    
-    
-    
-    init(filePath:String){
-        super.init()
-        var meshData = NSData(contentsOfURL: NSBundle.mainBundle().URLForResource(filePath, withExtension: "json")!)
-        //var error = NSErrorPointer()
-        var jsonDict = NSJSONSerialization.JSONObjectWithData(meshData!, options: NSJSONReadingOptions.AllowFragments, error: nil) as! NSDictionary
-        m_vertexArray = jsonDict.objectForKey("vertex") as? [Float]
-        var vertexIndices = jsonDict.objectForKey("index") as? [Float]
-        m_vertexIndices = [UInt16](count: vertexIndices!.count, repeatedValue: 0)
-        for var i = 0 ; i < vertexIndices!.count ; ++i{
-            m_vertexIndices![i] = UInt16(vertexIndices![i])
-        }
-    }
-    
-    init(vertexArray:[Float],indices:[UInt16]?) {
-        super.init()
-        m_vertexArray = vertexArray
-        if indices != nil{
-            m_vertexIndices = indices
-        }
-        
-    }
-    
-    func arrayLength<T>(array:[T])->Int{
-        return sizeofValue(array[0]) * array.count
-    }
-    
-    func vertexArrayLength()->Int{
-        return arrayLength(m_vertexArray!)
-    }
-    
-    func vertexIndicesLength()->Int{
-        return arrayLength(m_vertexIndices!)
-    }
-    
-}
-
-
-
-
-
-
 
 class MTLMesh:NSObject {
     var m_meshAssets:MeshAssets! = nil
@@ -73,7 +25,7 @@ class MTLMesh:NSObject {
     var m_depthType:MTLPixelFormat?
     var m_blendingEnable:Bool!  = nil
     
-    init(meshAsset:MeshAssets,scene:MTLGameScene,vertexShader:String,fragmentShader:String,drawType:MTLPrimitiveType,depthType:MTLPixelFormat,blendingEnable:Bool) {
+    init(meshAsset:MeshAssets?,scene:MTLGameScene,vertexShader:String,fragmentShader:String,drawType:MTLPrimitiveType,depthType:MTLPixelFormat,blendingEnable:Bool) {
         super.init()
         m_meshType = drawType
         m_depthType = depthType
@@ -83,9 +35,12 @@ class MTLMesh:NSObject {
         m_fragmentShader = fragmentShader
         m_meshAssets = meshAsset
         m_blendingEnable = blendingEnable
-        m_vertexBuffer = device.newBufferWithBytes(meshAsset.m_vertexArray!, length: meshAsset.vertexArrayLength(), options: nil)
-        if m_meshAssets.m_vertexIndices != nil{
-            m_indexBuffer = device.newBufferWithBytes(meshAsset.m_vertexIndices!, length: meshAsset.vertexIndicesLength(), options: nil)
+        if meshAsset != nil{
+            m_vertexBuffer = device.newBufferWithBytes(meshAsset!.m_vertexArray!, length: meshAsset!.vertexArrayLength(),     options: nil)
+            m_vertexBuffer.label = "Mesh Vertex Buffer"
+            if m_meshAssets.m_vertexIndices != nil{
+                m_indexBuffer = device.newBufferWithBytes(meshAsset!.m_vertexIndices!, length: meshAsset!.vertexIndicesLength(),  options: nil)
+            }
         }
         //prepareRenderPipeLineStateWithShaderName(device, vertexShader: vertexShader, fragmentShader: fragmentShader)
     }
@@ -110,13 +65,12 @@ class MTLMesh:NSObject {
             renderPipelineDesc.colorAttachments[0].sourceAlphaBlendFactor = MTLBlendFactor.SourceAlpha
             renderPipelineDesc.colorAttachments[0].destinationRGBBlendFactor = MTLBlendFactor.OneMinusBlendAlpha;
             renderPipelineDesc.colorAttachments[0].destinationAlphaBlendFactor = MTLBlendFactor.OneMinusBlendAlpha;
-        }else{
-            renderPipelineDesc.colorAttachments[0].blendingEnabled = false
         }
         renderPipelineDesc.depthAttachmentPixelFormat = depthPixelFormat
         var error:NSErrorPointer
         renderPipelineDesc.stencilAttachmentPixelFormat = MTLPixelFormat.Stencil8
         m_renderPipeLineState = device.newRenderPipelineStateWithDescriptor(renderPipelineDesc, error: nil)
+        renderPipelineDesc.colorAttachments[0].blendingEnabled = false
     }
     
     
