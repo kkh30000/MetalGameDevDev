@@ -28,8 +28,9 @@ struct ParticleProperty{
 
 // Global constants
 constant float POINT_SIZE = 60.0f;
-constant float3 a = float3(0.0, 18.0f, 0.0);
-constant float3 x_0 = float3(0.0, 1.0, 0.0);
+constant float3 a = float3(.0, -18.0f, .0);
+constant float3 x_0 = float3(0.0, 0.0, 0.0);
+//constant float3 GRAVITITY = float3(0.0,-10,0.0)
 
 
 // Phong vertex shader function
@@ -48,6 +49,8 @@ vertex ColorInOut vertexParticle(device packed_float3* initialDirection [[ buffe
     // Have the particles repeat their movement by keeping their time between 0 and their
     // lifespan.
     float t = fmod(particleUniform.t + birthOffsets[vid], particleUniform.lifespan);
+    
+    
     
     // Calculate the position of the particle based on the physics equation for motion:
     // x = x_0 + (v_0 * t) + (1/2)(a * t^2)

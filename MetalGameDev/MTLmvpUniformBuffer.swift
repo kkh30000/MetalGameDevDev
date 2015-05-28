@@ -13,6 +13,7 @@ import Metal
 class MTLMVPUniform: MTLUniform {
     var m_mvpMatrix:[Float]! = nil
     var m_player:MTLGamePlayer! = nil
+    var m_modelMatrix:Matrix! = nil
     
     init(model:Matrix,view:Matrix,projection:Matrix,device:MTLDevice,player:MTLGamePlayer){
         super.init(size: sizeofValue(model.raw()[0]) * 48, device: device)
@@ -20,6 +21,7 @@ class MTLMVPUniform: MTLUniform {
         m_mvpMatrix[0...15] = model.raw()[0...15]
         m_mvpMatrix[16...31] = view.raw()[0...15]
         m_mvpMatrix[32...47] = projection.raw()[0...15]
+        m_modelMatrix = model
         for var i = 0 ; i < 3 ; ++i{
             updateDataToUniform(m_mvpMatrix, toUniform: self[i])
         }
@@ -30,6 +32,8 @@ class MTLMVPUniform: MTLUniform {
         super.init(size: sizeofValue(uniform.m_data![0]) * 48, device: device)
         m_mvpMatrix = [Float](count: 48, repeatedValue: 0.0)
         m_mvpMatrix = uniform.m_mvpMatrix
+        m_modelMatrix = Matrix()
+        m_modelMatrix.m_raw = uniform.m_modelMatrix.m_raw
         for var i = 0 ; i < 3 ; ++i{
             updateDataToUniform(m_mvpMatrix, toUniform: self[i])
         }
@@ -49,6 +53,13 @@ class MTLMVPUniform: MTLUniform {
         m_mvpMatrix[32...47] = projection[0...15]
         //update()
     }
+    func modelMatrix()->Matrix{
+        return m_modelMatrix
+    }
+    func setModelMatrix(){
+        m_mvpMatrix[0...15] = m_modelMatrix.raw()[0...15]
+    }
+    
     
     func update() {
         updateDataToUniform(m_mvpMatrix, player: m_player)

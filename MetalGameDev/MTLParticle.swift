@@ -36,9 +36,9 @@ class MTLParticle: NSObject {
             var d_0_z = spread * (2.0 * Float(rand()) / Float(RAND_MAX))
             var length = sqrt(d_0_x * d_0_x + d_0_y * d_0_y + d_0_z * d_0_z)
             
-            m_initialDirection[i * 3] = d_0_x / length
-            m_initialDirection[i * 3 + 1] = d_0_y / length
-            m_initialDirection[i * 3 + 2] = d_0_z / length
+            m_initialDirection[i * 3] = d_0_x / length * 500
+            m_initialDirection[i * 3 + 1] = d_0_y / length * 1500
+            m_initialDirection[i * 3 + 2] = d_0_z / length * 500
         }
         
         
@@ -47,7 +47,7 @@ class MTLParticle: NSObject {
         
         
         for var i = 0 ; i < numOfParticles ; ++i{
-            m_birthOffset[i] = lifeSpan * (Float(rand()) / Float(RAND_MAX)) * 100
+            m_birthOffset[i] = lifeSpan * (Float(rand()) / Float(RAND_MAX))
             
         }
         

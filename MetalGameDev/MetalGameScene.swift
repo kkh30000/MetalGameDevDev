@@ -44,6 +44,8 @@ class MTLGameScene:UIView,MTLGameViewControllerDelegate{
     
     var m_viewWidth :Float! = nil
     var m_viewHeight:Float! = nil
+    
+    
 
     
     override class func layerClass()->AnyClass{
@@ -67,10 +69,10 @@ class MTLGameScene:UIView,MTLGameViewControllerDelegate{
         self.backgroundColor = nil
         
         
-        var panGesture = UIPanGestureRecognizer(target: self, action: "pan:")
-        //panGesture.maximumNumberOfTouches = 1
-        self.addGestureRecognizer(panGesture)
-        
+        //let panGesture = UIPanGestureRecognizer(target: self, action: "pan:")
+        //self.addGestureRecognizer(panGesture)
+        let tapGesture = UITapGestureRecognizer(target: self, action: "tap:")
+        self.addGestureRecognizer(tapGesture)
     
         //m_viewHeight = 600
         println(UIScreen.mainScreen().applicationFrame)
@@ -120,7 +122,7 @@ class MTLGameScene:UIView,MTLGameViewControllerDelegate{
         m_textureLoader = AAPLTexture2D(resourceName: "NormalMap", ext: "png")
         m_textureLoader.loadIntoTextureWithDevice(m_device!)
         actor2.m_normalMapping = m_textureLoader.texture
-        let particle = MTLParticle(device: m_device!, numOfParticles: 100, spread: 1000, lifeSpan: 5)
+        let particle = MTLParticle(device: m_device!, numOfParticles: 1000, spread: 1000, lifeSpan: 5)
         let particle1 = MTLParticle(device: m_device!, numOfParticles: 10, spread: 1000, lifeSpan: 10)
 
         var particleActor = MTLParticleActor(particle: particle, scene: self, vertexShader: "vertexParticle", fragmentShader: "fragmentParticle", drawType: MTLPrimitiveType.Point, deptType: MTLPixelFormat.Depth32Float, blendingEnable: true, actorType: ActorType.PARTICLE,mvpuniform:m_uniform)
@@ -190,6 +192,8 @@ class MTLGameScene:UIView,MTLGameViewControllerDelegate{
         let particle = m_player.m_actors![5] as! MTLParticleActor
         particle.updateParticle(viewcontroller)
         let particle1 = m_player.m_actors![6] as! MTLParticleActor
+        //particle1.m_mvp.modelMatrix().translate(0, y: 2.0, z: 1)
+        //particle1.m_mvp.setModelMatrix()
         particle1.updateParticle(viewcontroller)
 
         
@@ -205,11 +209,22 @@ class MTLGameScene:UIView,MTLGameViewControllerDelegate{
         return (x1,y1)
     }
     
-    func pan(panGesture:UIPanGestureRecognizer){
+    /*func pan(panGesture:UIPanGestureRecognizer){
         let pos = panGesture.locationInView(self)
         let posInWorld = unproject(normalizeTouchPoint(pos.x, y: pos.y))
+        //m_player.m_actors![3].translate(posInWorld)
+        if panGesture.state == UIGestureRecognizerState.Began{
+            m_player.m_actors![3].lookAtAxis(posInWorld)
+        }
+    }*/
+    func tap(tapGesture:UITapGestureRecognizer){
+        let pos = tapGesture.locationInView(self)
+        let posInWorld = unproject(normalizeTouchPoint(pos.x, y: pos.y))
         m_player.m_actors![3].translate(posInWorld)
+        //m_player.m_actors![3].lookAtAxis(posInWorld)
+    
     }
+
     
     
     func unproject(pos:(Float,Float))->[Float]{

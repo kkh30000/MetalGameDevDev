@@ -41,9 +41,6 @@ class MTLParticleActor: MTLActor {
         memcpy(m_birthOffsetBuffer.contents(),m_particle.m_birthOffset,  (sizeof(Float) * m_particle.m_initialDirection.count))
         m_birthOffsetBuffer.label = "birthoffset buffer"
         m_mvp = mvpuniform
-        //m_mvp = MTLMVPUniform(uniform: scene.m_uniform, device: scene.m_device!, player: scene.m_player)
-        //m_modelMatrix = Matrix()
-        //m_mvp.setModelMatrix(m_modelMatrix.raw())
         m_particleProperty = [Float](count: 2, repeatedValue: 0.0)
         m_particleProperty[0] = m_particle.m_lifespan
         m_particleUniform = MTLUniform(data: m_particleProperty, device: scene.m_device!)

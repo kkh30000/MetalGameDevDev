@@ -206,7 +206,7 @@ class Matrix:NSObject {
     }
     
     class func normalize(v:[Float])->[Float]{
-        var division = v[0] * v[0] + v[1] * v[1] + v[2] * v[2]
+        var division:Float = v[0] * v[0] + v[1] * v[1] + v[2] * v[2]
         division = sqrt(division)
         return [v[0] / division , v[1] / division ,v[2] / division]
     }

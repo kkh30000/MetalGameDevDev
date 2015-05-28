@@ -74,7 +74,7 @@ class MTLGamePlayer: NSObject{
         m_currentUniform = 0
         
         //初始化light pespetive
-        m_lightUniform = MTLMVPUniform(model: Matrix(), view: MTLCamera(pos: [1,500,1], target: [0,0,0], up: [0,1,0]).viewMatrix(), projection:Matrix.MatrixMakePerpective_fov(90, aspect: Float(m_scene!.frame.width)/Float(m_scene!.frame.height), near: 0.1, far: -1000), device: m_scene!.m_device!, player: self)
+        m_lightUniform = MTLMVPUniform(model: Matrix(), view: MTLCamera(pos: [1,500,1], target: [0,0,0], up: [0,1,0]).viewMatrix(), projection:Matrix.MatrixMakePerpective_fov(90, aspect: Float(m_scene!.frame.width)/Float(m_scene!.frame.height), near: 0.1, far: -100), device: m_scene!.m_device!, player: self)
         var modelView = Matrix()
         modelView.scale(Float(m_scene!.frame.size.width) / Float(m_scene!.frame.size.height), y: 1, z: 1)
         m_renderToScreenUniform = MTLMVPUniform(model: Matrix(), view: MTLCamera(pos: [0,0,0], target: [0,0,1], up: [0,1,0]).viewMatrix(), projection: Matrix.MatrixMakePerpective_fov(90, aspect: Float(m_scene!.frame.size.width)/Float(m_scene!.frame.size.width), near: 0.1, far: 1.00), device: m_scene!.m_device!, player: self)
@@ -231,6 +231,7 @@ class MTLGamePlayer: NSObject{
     }
     func renderToTexture(commandBuffer:MTLCommandBuffer){
          //m_renderToScreenUniform.update()
+        m_scene!.m_uniform.update()
         m_lights.updateLight()
         var paraCommanderEncoder = commandBuffer.parallelRenderCommandEncoderWithDescriptor(m_aaRenderPassDsc)
         var paraCommandEncoders :[MTLRenderCommandEncoder] = []
@@ -298,7 +299,7 @@ class MTLGamePlayer: NSObject{
     }
     func renderToScreen(commandBuffer:MTLCommandBuffer){
         m_renderToScreenUniform!.update()
-        m_scene!.m_uniform.update()
+        //m_scene!.m_uniform.update()
         var enCoder = commandBuffer.renderCommandEncoderWithDescriptor(m_scene!.renderPassDescriptor())
         enCoder!.setFragmentTexture(m_aaTexture, atIndex: 0)
         enCoder!.setVertexBuffer(m_renderToVertexBuffer, offset: 0, atIndex: 0)
