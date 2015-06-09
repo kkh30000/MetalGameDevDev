@@ -34,10 +34,13 @@ class MTLUniform: NSObject {
     init(data:[Float],device:MTLDevice){
         super.init()
         m_data = data
-        m_bufferSize = data.count * sizeofValue(data[0])
+        m_bufferSize = data.count * sizeof(Float)
         m_uniform1 = device.newBufferWithLength(m_bufferSize!, options: nil)
         m_uniform2 = device.newBufferWithLength(m_bufferSize!, options: nil)
         m_uniform3 = device.newBufferWithLength(m_bufferSize!, options: nil)
+        memcpy(m_uniform1!.contents(), m_data!, m_bufferSize!)
+        memcpy(m_uniform2!.contents(), m_data!, m_bufferSize!)
+        memcpy(m_uniform3!.contents(), m_data!, m_bufferSize!)
         m_device = device
 
     }

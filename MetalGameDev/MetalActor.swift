@@ -12,6 +12,7 @@ import Metal
 enum ActorType{
     case DEFAULT
     case PARTICLE
+    case FIREPARTICLE
 }
 
 class MTLActor:NSObject{
@@ -40,39 +41,30 @@ class MTLActor:NSObject{
     }
     
     func lookAtAxis(target:[Float]){
-        var toVector = Matrix.normalize([target[0],0,target[2]] - [m_pos[0],0,m_pos[2]])
-        let angleCos:Float = toVector * Matrix.normalize(m_lookAt)
+        var toVector = [target[0],0,target[2]] - [m_pos[0],0,m_pos[2]]
+        let angleCos:Float = Matrix.normalize(toVector) * Matrix.normalize(m_lookAt)
         let  angleToTarget:Float =  acos(angleCos) * 180 / 3.1415
         let rotateUp = Matrix.cross(m_lookAt, b: toVector)
-        
-        //var matrix = Matrix.MatrixMakeRotate(angleToTarget, r: rotateUp)
-        m_lookAt = [target[0],0,target[2]] - [m_pos[0],0,m_pos[2]]
-
-        //println(angleToTarget)
+        m_lookAt = toVector
         m_scene.m_uniform.m_modelMatrix.rotate(angleToTarget, r: rotateUp)
-        //println(m_scene!.m_uniform.m_modelMatrix.raw())
-        //m_scene.m_uniform.setModelMatrix()
         m_scene.m_player.m_lightUniform.m_modelMatrix.rotate(angleToTarget, r: rotateUp)
-        //m_scene.m_player.m_lightUniform.setModelMatrix()
-        //return matrix
     }
     
     /*func lookAtPoint(target:[Float]){
-    var toVectorProjection = [target[0],0,target[2]]
-    let angleCos = Matrix.normalize(toVectorProjection)[2]
-    let angleToTarget =  acos(angleCos) * 180 / 3.1415
-    let rotateUp = Matrix.cross(m_lookAt, b: toVectorProjection)
-    var matrix = Matrix.MatrixMakeRotate(angleToTarget, r: rotateUp)
-    m_scene.m_player.m_lightUniform.setModelMatrix(matrix.raw())
-    
-    var toVector = [target[0],target[1],target[2]]
-    let rotateRight = Matrix.cross(toVectorProjection, b: toVector)
-    let angleCos1 = Matrix.normalize(toVector)[2]
-    let angleToTarget1 =  acos(angleCos1) * 180 / 3.1415
-    
-    //println(rotateRight,angleToTarget1)
-    matrix.rotate(angleToTarget1, r: rotateRight)
-    m_scene.m_uniform.setModelMatrix(matrix.raw())
+        var toVector = [target[0],0,target[2]] - [m_pos[0],0,m_pos[2]]
+        let angleCos:Float = Matrix.normalize(toVector) * Matrix.normalize(m_lookAt)
+        let  angleToTarget:Float =  acos(angleCos) * 180 / 3.1415
+        let rotateUp = Matrix.cross(m_lookAt, b: toVector)
+        m_scene.m_uniform.m_modelMatrix.rotate(angleToTarget, r: rotateUp)
+        m_scene.m_player.m_lightUniform.m_modelMatrix.rotate(angleToTarget, r: rotateUp)
+        toVector = target - m_pos
+        let angleCos1:Float = Matrix.normalize(toVector) * Matrix.normalize(m_lookAt)
+        let angleToTarget1:Float = acos(angleCos1) * 180 / 3.1415
+        let rotateUp1 = Matrix.cross(toVector, b: m_lookAt)
+        m_lookAt = toVector
+        m_scene.m_uniform.m_modelMatrix.rotate(angleToTarget1, r: rotateUp1)
+        m_scene.m_player.m_lightUniform.m_modelMatrix.rotate(angleToTarget1, r: rotateUp1)
+        
     }*/
     
     func translate(target:[Float]){
@@ -80,6 +72,7 @@ class MTLActor:NSObject{
         
         
         lookAtAxis(target)
+        //lookAtPoint(target)
         m_scene.m_uniform.modelMatrix().translate(delta[0], y: 0, z: delta[2])
         m_scene.m_uniform.setModelMatrix()
         m_scene.m_player.m_lightUniform.modelMatrix().translate(delta[0], y: 0, z: delta[2])

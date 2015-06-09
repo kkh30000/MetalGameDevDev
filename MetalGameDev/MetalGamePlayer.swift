@@ -12,8 +12,7 @@ class MTLGamePlayer: NSObject{
     var m_scene:MTLGameScene?
     
     var m_actors:[MTLActor]?
-    
-    var m_renderPipeLineState:MTLRenderPipelineState?
+    var m_renderPipeLineDesc:MTLRenderPipelineDescriptor! = nil
     var m_depthState:MTLDepthStencilState?
     var m_queue:MTLCommandQueue?
     var m_deptPixelFormat:MTLPixelFormat?
@@ -48,6 +47,8 @@ class MTLGamePlayer: NSObject{
     //var m_lightProjcetion:[Float]! = nil
     var m_lightUniform:MTLMVPUniform! = nil
     var m_lights:MTLLights! = nil
+    
+    var m_computePipelineState : MTLComputePipelineState! = nil
     init(scene:MTLGameScene) {
         super.init()
         m_scene = scene
@@ -82,6 +83,16 @@ class MTLGamePlayer: NSObject{
         
         m_lights = MTLLights(lights: [light0], device: m_scene!.m_device!)
         
+        
+        //Test computepipelinestate 
+        
+        //var computeEncoder = commandBuffer.computeCommandEncoder()
+        let library = m_scene!.m_device!.newDefaultLibrary()
+        let computeFunc = library!.newFunctionWithName("test_kernel")
+        m_computePipelineState = m_scene!.m_device!.newComputePipelineStateWithFunction(computeFunc!, error: nil)
+        m_renderPipeLineDesc = MTLRenderPipelineDescriptor()
+
+        
     }
     func prepareActors(actors:[MTLActor]){
         m_actors = actors
@@ -115,6 +126,13 @@ class MTLGamePlayer: NSObject{
         }
         
         //Final Pass: Render Into Screen
+        
+        //Compute Shader Test
+        
+        
+        
+        
+        
         renderPipeLineStateDesc.label = "Final Pass"
         renderPipeLineStateDesc.vertexFunction! = m_scene!.m_device!.newDefaultLibrary()!.newFunctionWithName("render_to_screen_vertex")!
         renderPipeLineStateDesc.fragmentFunction! = m_scene!.m_device!.newDefaultLibrary()!.newFunctionWithName("render_to_screen_fragment")!
@@ -146,7 +164,7 @@ class MTLGamePlayer: NSObject{
         var paraCommandEncoders :[MTLRenderCommandEncoder] = []
         //粒子 不需要渲染阴影
         for var i = 0 ; i < m_actors!.count ; ++i{
-            if m_actors![i].m_actorType == ActorType.PARTICLE{
+            if m_actors![i].m_actorType == ActorType.PARTICLE || m_actors![i].m_actorType == ActorType.FIREPARTICLE{
                 continue
             }
             paraCommandEncoders.append(paraCommanderEncoder!.renderCommandEncoder())
@@ -156,7 +174,7 @@ class MTLGamePlayer: NSObject{
         
         for var i = 0; i < m_actors!.count ; ++i{
             //粒子 不需要渲染阴影
-            if m_actors![i].m_actorType == ActorType.PARTICLE{
+            if m_actors![i].m_actorType == ActorType.PARTICLE || m_actors![i].m_actorType == ActorType.FIREPARTICLE{
                 //println("Pariticle System")
                 continue
             }
@@ -229,7 +247,7 @@ class MTLGamePlayer: NSObject{
         
 
     }
-    func renderToTexture(commandBuffer:MTLCommandBuffer){
+    func renderToTexture(commandBuffer:MTLCommandBuffer,computeCommand:MTLCommandBuffer){
          //m_renderToScreenUniform.update()
         m_scene!.m_uniform.update()
         m_lights.updateLight()
@@ -277,17 +295,8 @@ class MTLGamePlayer: NSObject{
                 paraCommandEncoders[i].endEncoding()
 
             }else if m_actors![i].m_actorType == ActorType.PARTICLE{
-                let particle:MTLParticleActor = m_actors![i] as! MTLParticleActor
-                //particle.m_mvp.update()
-                paraCommandEncoders[i].setVertexBuffer(particle.m_mvp[m_currentUniform!], offset: 0, atIndex: 0)
-                paraCommandEncoders[i].setVertexBuffer(particle.m_initialDirectionBuffer, offset: 0, atIndex: 1)
-                paraCommandEncoders[i].setVertexBuffer(particle.m_birthOffsetBuffer, offset: 0, atIndex: 2)
-                paraCommandEncoders[i].setVertexBuffer(particle.m_particleUniform[m_currentUniform!], offset: 0, atIndex: 3)
-                paraCommandEncoders[i].setRenderPipelineState(particle.m_mesh.m_renderPipeLineState!)
-                paraCommandEncoders[i].drawPrimitives(m_actors![i].m_mesh!.m_meshType!, vertexStart: 0, vertexCount: particle.m_particle.m_numOfParticles)
-                paraCommandEncoders[i].endEncoding()
-            }
             
+            }
         }
         paraCommanderEncoder!.endEncoding()
         // m_scene!.m_uniform!.updateDataToUniform(m_scene!.m_mvpMatrix, toUniform: m_scene!.m_uniform[m_currentUniform!])
@@ -300,6 +309,20 @@ class MTLGamePlayer: NSObject{
     func renderToScreen(commandBuffer:MTLCommandBuffer){
         m_renderToScreenUniform!.update()
         //m_scene!.m_uniform.update()
+        //Test Compute Command
+        
+        if m_scene!.m_blackWhite == true{
+            var computeEncoder = commandBuffer.computeCommandEncoder()
+            computeEncoder.setComputePipelineState(m_computePipelineState)
+            computeEncoder.setTexture(m_aaTexture, atIndex: 0)
+            computeEncoder.setTexture(m_aaTexture, atIndex: 1)
+            let threadPerGroup:MTLSize = MTLSize(width: 16, height: 16, depth: 1)
+            let numOfGroup = MTLSize(width: m_aaTexture.width / threadPerGroup.width,height: m_aaTexture.height/threadPerGroup.height,depth: 1)
+            computeEncoder.dispatchThreadgroups(numOfGroup, threadsPerThreadgroup: threadPerGroup)
+            computeEncoder.endEncoding()
+        }
+        
+        
         var enCoder = commandBuffer.renderCommandEncoderWithDescriptor(m_scene!.renderPassDescriptor())
         enCoder!.setFragmentTexture(m_aaTexture, atIndex: 0)
         enCoder!.setVertexBuffer(m_renderToVertexBuffer, offset: 0, atIndex: 0)
@@ -317,10 +340,11 @@ class MTLGamePlayer: NSObject{
         dispatch_semaphore_wait(m_semaphore!, DISPATCH_TIME_FOREVER)
         
         var commandBuffer = self.m_scene!.m_commandQueue!.commandBuffer()
+        var computecommandBuffer1 = self.m_scene!.m_commandQueue!.commandBuffer()
         //First Pass Shadow Mapping
         renderShadowMap(commandBuffer)
         //Second Pass Render To Texture
-        renderToTexture(commandBuffer)
+        renderToTexture(commandBuffer,computeCommand: computecommandBuffer1)
         //Final Pass Render To Screen
         renderToScreen(commandBuffer)
     

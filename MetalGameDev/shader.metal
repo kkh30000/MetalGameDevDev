@@ -146,7 +146,7 @@ fragment float4 phong_fragment_static(OutVertex in [[stage_in]],depth2d<float> s
     float4 modelColor;
     constexpr sampler shadow_sampler(coord::normalized, filter::linear, address::clamp_to_zero, compare_func::less);
     constexpr sampler texture_sampler;
-    modelColor = modelTexture.sample(texture_sampler,in.texCoord);
+    modelColor = modelTexture.sample(texture_sampler,in.texCoord,0);
     //float shadow = shadow_texture.sample_compare(shadow_sampler, in.v_shadowcoord.xy/in.v_shadowcoord.w, in.v_shadowcoord.z/in.v_shadowcoord.w);
     //计算漫反射
     float3 n = normalize(in.normal_camerasapce);

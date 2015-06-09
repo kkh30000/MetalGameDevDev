@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5709C9521B1F0D2F00777D28 /* testcomputeshader.metal in Sources */ = {isa = PBXBuildFile; fileRef = 5709C9511B1F0D2F00777D28 /* testcomputeshader.metal */; };
+		5709C9581B200B7D00777D28 /* compute_particle_fire.metal in Sources */ = {isa = PBXBuildFile; fileRef = 5709C9571B200B7D00777D28 /* compute_particle_fire.metal */; };
 		57270BB91AE615A700AAE3F2 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57270BB81AE615A700AAE3F2 /* AppDelegate.swift */; };
 		57270BBE1AE615A700AAE3F2 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 57270BBC1AE615A700AAE3F2 /* Main.storyboard */; };
 		57270BC01AE615A700AAE3F2 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 57270BBF1AE615A700AAE3F2 /* Images.xcassets */; };
@@ -38,9 +40,6 @@
 		5797B5251AE6B65A0051A2B4 /* animation1.json in Resources */ = {isa = PBXBuildFile; fileRef = 5797B5241AE6B65A0051A2B4 /* animation1.json */; };
 		57C1E2AD1AE6A4E300BCD75A /* animation.json in Resources */ = {isa = PBXBuildFile; fileRef = 57C1E2AC1AE6A4E300BCD75A /* animation.json */; };
 		57D55D251B0EDC47009D927D /* MTLMeshAsset.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57D55D241B0EDC47009D927D /* MTLMeshAsset.swift */; };
-		57D55D281B0EDC9E009D927D /* MTLParticle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57D55D271B0EDC9E009D927D /* MTLParticle.swift */; };
-		57D55D2B1B0EECB5009D927D /* MTLParticleActor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57D55D2A1B0EECB5009D927D /* MTLParticleActor.swift */; };
-		57D55D2F1B0F19A9009D927D /* particle.metal in Sources */ = {isa = PBXBuildFile; fileRef = 57D55D2E1B0F19A9009D927D /* particle.metal */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -54,6 +53,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		5709C9511B1F0D2F00777D28 /* testcomputeshader.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = testcomputeshader.metal; sourceTree = "<group>"; };
+		5709C9571B200B7D00777D28 /* compute_particle_fire.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = compute_particle_fire.metal; sourceTree = "<group>"; };
 		57270BB31AE615A700AAE3F2 /* MetalGameDev.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MetalGameDev.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		57270BB71AE615A700AAE3F2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		57270BB81AE615A700AAE3F2 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -93,9 +94,6 @@
 		5797B5241AE6B65A0051A2B4 /* animation1.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = animation1.json; sourceTree = "<group>"; };
 		57C1E2AC1AE6A4E300BCD75A /* animation.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = animation.json; sourceTree = "<group>"; };
 		57D55D241B0EDC47009D927D /* MTLMeshAsset.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MTLMeshAsset.swift; sourceTree = "<group>"; };
-		57D55D271B0EDC9E009D927D /* MTLParticle.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MTLParticle.swift; sourceTree = "<group>"; };
-		57D55D2A1B0EECB5009D927D /* MTLParticleActor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MTLParticleActor.swift; sourceTree = "<group>"; };
-		57D55D2E1B0F19A9009D927D /* particle.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = particle.metal; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -170,7 +168,7 @@
 				5797B5241AE6B65A0051A2B4 /* animation1.json */,
 				5763B68E1B0B1932009F02A5 /* structure.h */,
 				5763B68C1B0B18FC009F02A5 /* normalmapping.metal */,
-				57D55D2E1B0F19A9009D927D /* particle.metal */,
+				5709C9511B1F0D2F00777D28 /* testcomputeshader.metal */,
 				5735C9E31AE62BDC00703391 /* shader.metal */,
 				57597D931AF8ECAE00E33FBF /* AAPLPVRTexture.h */,
 				57597D941AF8ECAE00E33FBF /* AAPLPVRTexture.m */,
@@ -179,6 +177,7 @@
 				57270BC11AE615A700AAE3F2 /* LaunchScreen.xib */,
 				577EE6F61AE618A400BE78F4 /* MetalGameDev-Bridging-Header.h */,
 				57270BB71AE615A700AAE3F2 /* Info.plist */,
+				5709C9571B200B7D00777D28 /* compute_particle_fire.metal */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -222,7 +221,6 @@
 		57D55D261B0EDC8E009D927D /* Particle */ = {
 			isa = PBXGroup;
 			children = (
-				57D55D271B0EDC9E009D927D /* MTLParticle.swift */,
 			);
 			name = Particle;
 			sourceTree = "<group>";
@@ -231,7 +229,6 @@
 			isa = PBXGroup;
 			children = (
 				57270BDE1AE6164600AAE3F2 /* MetalActor.swift */,
-				57D55D2A1B0EECB5009D927D /* MTLParticleActor.swift */,
 			);
 			name = Actor;
 			sourceTree = "<group>";
@@ -346,7 +343,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				57270BD91AE615D200AAE3F2 /* MetalGameViewController.swift in Sources */,
-				57D55D281B0EDC9E009D927D /* MTLParticle.swift in Sources */,
 				57597D971AF8ECAE00E33FBF /* AAPLPVRTexture.m in Sources */,
 				574644021AFB4FDF00214BBB /* MTLReadOnlyUniform.swift in Sources */,
 				574644001AFB47D400214BBB /* MTLLight.swift in Sources */,
@@ -358,15 +354,15 @@
 				57597D981AF8ECAE00E33FBF /* AAPLTexture.m in Sources */,
 				57270BE71AE6167F00AAE3F2 /* MTLUniform.swift in Sources */,
 				5763B68D1B0B18FC009F02A5 /* normalmapping.metal in Sources */,
-				57D55D2F1B0F19A9009D927D /* particle.metal in Sources */,
 				57270BDD1AE6162D00AAE3F2 /* MetalGamePlayer.swift in Sources */,
 				577EE6F51AE617D200BE78F4 /* MTLCamera.swift in Sources */,
 				57D55D251B0EDC47009D927D /* MTLMeshAsset.swift in Sources */,
 				57270BDF1AE6164600AAE3F2 /* MetalActor.swift in Sources */,
 				57270BDB1AE615FB00AAE3F2 /* MetalGameScene.swift in Sources */,
+				5709C9521B1F0D2F00777D28 /* testcomputeshader.metal in Sources */,
 				57270BE51AE6167500AAE3F2 /* Math.swift in Sources */,
+				5709C9581B200B7D00777D28 /* compute_particle_fire.metal in Sources */,
 				572E80F11AE904310093869D /* Asset1.swift in Sources */,
-				57D55D2B1B0EECB5009D927D /* MTLParticleActor.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
